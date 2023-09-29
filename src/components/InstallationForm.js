@@ -6,6 +6,7 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
   const [foundationInstallPreviews, setFoundationInstallPreviews] = useState(
     []
   );
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [monumentSettingImage, setMonumentSettingImage] = useState(null);
 
   const handleFoundationInstallUpload = (e) => {
@@ -59,6 +60,7 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
       if (response.ok) {
         // Handle successful response (e.g., show a success message)
         console.log("Foundation/Setting submission successful!");
+        setSubmissionSuccess(true);
       } else {
         // Handle error response
         console.error("Foundation/Setting submission failed.");
@@ -88,8 +90,16 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
         accept="image/*"
         onChange={handleMonumentSettingUpload}
       />
-      <SubmitButton type="button" onClick={handleUpload}>
-        Submit to Upload
+      <SubmitButton
+        type="button"
+        onClick={handleUpload}
+        disabled={
+          foundationInstallImages.length <= 0 ||
+          monumentSettingImage === null ||
+          submissionSuccess
+        }
+      >
+        {submissionSuccess ? "Submitted" : "Submit to Upload"}
       </SubmitButton>
     </FormContainer>
   );

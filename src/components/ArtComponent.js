@@ -4,6 +4,7 @@ import styled from "styled-components";
 const ArtComponent = ({ headStoneName, invoiceNo }) => {
   const [finalArtImages, setFinalArtImages] = useState([]);
   const [finalArtPreviews, setFinalArtPreviews] = useState([]);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [cemeteryApprovalImage, setCemeteryApprovalImage] = useState(null);
 
   const handleFinalArtUpload = (e) => {
@@ -54,6 +55,7 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
       if (response.ok) {
         // Handle successful response (e.g., show a success message)
         console.log("Art submission successful!");
+        setSubmissionSuccess(true);
       } else {
         // Handle error response
         console.error("Art submission failed.");
@@ -88,8 +90,16 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
           onChange={handleCemeteryApprovalUpload}
           required
         />
-        <SubmitButton type="button" onClick={handleArtSubmission}>
-          Submit to Engraving
+        <SubmitButton
+          type="button"
+          onClick={handleArtSubmission}
+          disabled={
+            finalArtImages.length <= 0 ||
+            cemeteryApprovalImage === null ||
+            submissionSuccess
+          }
+        >
+          {submissionSuccess ? "Submitted" : "Submit to Engraving"}
         </SubmitButton>
       </ArtForm>
     </ArtContainer>

@@ -15,6 +15,7 @@ import html2canvas from "html2canvas";
 const WorkOrder = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+  const [submissionSuccess, setSubmissionSuccess]=useState(false)
   const [formData, setFormData] = useState({
     headStoneName: "",
     invoiceNo: "",
@@ -112,6 +113,7 @@ const WorkOrder = () => {
 
       if (response.ok) {
         console.log("Submission to Cemetery successful!");
+        setSubmissionSuccess(true);
         // Optionally, you can redirect or show a success message here
       } else {
         console.error("Submission to Cemetery failed.");
@@ -185,8 +187,8 @@ const WorkOrder = () => {
                   <Thumbnail key={index} src={image} />
                 ))}
               </ImagePreview>
-              <SubmitButton type="button" onClick={submitToCemetery}>
-                Submit to Cemetery
+              <SubmitButton type="button" onClick={submitToCemetery} disabled={uploadedImages.length<=0 || submissionSuccess}>
+              {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
               </SubmitButton>
             </DesignForm>
           </CustomerDesign>

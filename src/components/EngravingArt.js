@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 const EngravingArt = ({ headStoneName, invoiceNo }) => {
   const [engravingImage, setEngravingImage] = useState(null);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
   const handleEngravingImageUpload = (e) => {
     const file = e.target.files[0];
@@ -33,6 +34,7 @@ const EngravingArt = ({ headStoneName, invoiceNo }) => {
       if (response.ok) {
         // Handle successful response (e.g., show a success message)
         console.log("Engraving submission successful!");
+        setSubmissionSuccess(true);
       } else {
         // Handle error response
         console.error("Engraving submission failed.");
@@ -58,8 +60,12 @@ const EngravingArt = ({ headStoneName, invoiceNo }) => {
             <Thumbnail src={URL.createObjectURL(engravingImage)} />
           </ImagePreview>
         )}
-        <SubmitButton type="button" onClick={submitToEngraving}>
-          Submit to Install
+        <SubmitButton
+          type="button"
+          onClick={submitToEngraving}
+          disabled={engravingImage === null || submissionSuccess}
+        >
+          {submissionSuccess ? "Submitted" : "Submit to Install"}
         </SubmitButton>
       </EngravingForm>
     </EngravingContainer>
