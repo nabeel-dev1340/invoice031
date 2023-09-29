@@ -853,65 +853,54 @@ const AccountsSection = styled.section`
   padding-top: 15px;
   padding-bottom: 20px;
   background: #e7e9eb;
-
   .model-row {
     display: flex;
     justify-content: space-around;
   }
-
   .model-flex {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-
   .model-row input,
   select {
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 3px;
   }
-
   .details-row {
     display: flex;
     justify-content: space-around;
     gap: 55px;
   }
-
   .left-section {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 15px;
   }
-
   .details-input {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
   }
-
   .grey-highlight {
     background-color: #b9b3b3;
   }
-
   .total-inputs input {
     padding: 5px;
     border: 1px solid #ccc;
     border-radius: 3px;
   }
-
   .end-note {
     text-align: center;
   }
-
   .right-section .total-inputs {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
-
   .model-flex-right {
     display: flex;
     justify-content: space-between;

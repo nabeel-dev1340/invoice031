@@ -68,8 +68,7 @@ const WorkOrder = () => {
       canvas.toBlob(async (blob) => {
         // Create a FormData object to send data to the server
         const formDataToSend = new FormData();
-        formDataToSend.append("invoiceNo", formData.invoiceNo);
-        formDataToSend.append("workOrder", blob, `${formData.invoiceNo}.png`);
+        formDataToSend.append("workOrder", blob, `${formData.headStoneName}..${formData.invoiceNo}.png`);
 
         // Make a POST API call to the /work-order endpoint
         const response = await fetch("http://localhost:3000/work-order", {
