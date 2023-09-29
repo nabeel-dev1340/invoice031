@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const ArtComponent = () => {
+const ArtComponent = ({ headStoneName, invoiceNo }) => {
   const [finalArtImages, setFinalArtImages] = useState([]);
   const [finalArtPreviews, setFinalArtPreviews] = useState([]);
   const [cemeteryApprovalImage, setCemeteryApprovalImage] = useState(null);
@@ -27,6 +27,42 @@ const ArtComponent = () => {
     setCemeteryApprovalImage(file);
   };
 
+  const handleArtSubmission = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("headstoneName", headStoneName);
+      formDataToSend.append("invoiceNo", invoiceNo);
+
+      // Append final art images
+      finalArtImages.forEach((file, index) => {
+        formDataToSend.append(`finalArtImages`, file);
+      });
+
+      // Append cemetery approval image
+      if (cemeteryApprovalImage) {
+        formDataToSend.append("finalArtImages", cemeteryApprovalImage);
+      }
+
+      // Make a POST request to your API endpoint
+      const response = await fetch("http://localhost:3000/art-submission", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (response.ok) {
+        // Handle successful response (e.g., show a success message)
+        console.log("Art submission successful!");
+      } else {
+        // Handle error response
+        console.error("Art submission failed.");
+      }
+    } catch (error) {
+      console.error("Error submitting art:", error);
+    }
+  };
+
   return (
     <ArtContainer>
       <h3>Artwork Submission</h3>
@@ -35,6 +71,7 @@ const ArtComponent = () => {
         <ImageInput
           type="file"
           accept="image/*"
+          name="finalArtImages"
           multiple
           onChange={handleFinalArtUpload}
           required
@@ -51,7 +88,9 @@ const ArtComponent = () => {
           onChange={handleCemeteryApprovalUpload}
           required
         />
-        <SubmitButton type="submit">Submit to Engraving</SubmitButton>
+        <SubmitButton type="button" onClick={handleArtSubmission}>
+          Submit to Engraving
+        </SubmitButton>
       </ArtForm>
     </ArtContainer>
   );
@@ -60,20 +99,20 @@ const ArtComponent = () => {
 export default ArtComponent;
 
 const ArtContainer = styled.div`
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
-  width:80%;
+  width: 80%;
   margin-left: auto;
   margin-right: auto;
-  h3{
+  h3 {
     font-size: 24px;
   }
 `;
 
-const ArtForm = styled.form`
+const ArtForm = styled.div`
   margin-top: 20px;
 `;
 

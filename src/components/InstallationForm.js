@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const InstallationForm = () => {
+const InstallationForm = ({ headStoneName, invoiceNo }) => {
   const [foundationInstallImages, setFoundationInstallImages] = useState([]);
   const [foundationInstallPreviews, setFoundationInstallPreviews] = useState(
     []
@@ -29,6 +29,45 @@ const InstallationForm = () => {
     setMonumentSettingImage(file);
   };
 
+  const handleUpload = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("headstoneName", headStoneName);
+      formDataToSend.append("invoiceNo", invoiceNo);
+
+      // Append final art images
+      foundationInstallImages.forEach((file, index) => {
+        formDataToSend.append(`foundationInstallImages`, file);
+      });
+
+      // Append cemetery approval image
+      if (monumentSettingImage) {
+        formDataToSend.append("foundationInstallImages", monumentSettingImage);
+      }
+
+      // Make a POST request to your API endpoint
+      const response = await fetch(
+        "http://localhost:3000/foundation-submission",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
+
+      if (response.ok) {
+        // Handle successful response (e.g., show a success message)
+        console.log("Foundation/Setting submission successful!");
+      } else {
+        // Handle error response
+        console.error("Foundation/Setting submission failed.");
+      }
+    } catch (error) {
+      console.error("Error submitting Foundation/Setting:", error);
+    }
+  };
+
   return (
     <FormContainer>
       <InputLabel>Foundation Install</InputLabel>
@@ -49,7 +88,9 @@ const InstallationForm = () => {
         accept="image/*"
         onChange={handleMonumentSettingUpload}
       />
-      {/* ... other inputs or buttons ... */}
+      <SubmitButton type="button" onClick={handleUpload}>
+        Submit to Upload
+      </SubmitButton>
     </FormContainer>
   );
 };
@@ -83,6 +124,20 @@ const Thumbnail = styled.img`
   object-fit: cover;
   border-radius: 5px;
   margin: 10px;
+`;
+
+const SubmitButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
 `;
 
 export default InstallationForm;

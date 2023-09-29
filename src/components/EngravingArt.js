@@ -1,12 +1,45 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-const EngravingArt = () => {
+const EngravingArt = ({ headStoneName, invoiceNo }) => {
   const [engravingImage, setEngravingImage] = useState(null);
 
   const handleEngravingImageUpload = (e) => {
     const file = e.target.files[0];
     setEngravingImage(file);
+  };
+
+  const submitToEngraving = async (e) => {
+    e.preventDefault();
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("headstoneName", headStoneName);
+      formDataToSend.append("invoiceNo", invoiceNo);
+
+      if (engravingImage) {
+        formDataToSend.append("engravingImage", engravingImage);
+      }
+
+      // Make a POST request to your API endpoint
+      const response = await fetch(
+        "http://localhost:3000/engraving-submission",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
+
+      if (response.ok) {
+        // Handle successful response (e.g., show a success message)
+        console.log("Engraving submission successful!");
+      } else {
+        // Handle error response
+        console.error("Engraving submission failed.");
+      }
+    } catch (error) {
+      console.error("Error submitting engraving:", error);
+    }
   };
 
   return (
@@ -25,7 +58,9 @@ const EngravingArt = () => {
             <Thumbnail src={URL.createObjectURL(engravingImage)} />
           </ImagePreview>
         )}
-        <SubmitButton type="submit">Submit to Install</SubmitButton>
+        <SubmitButton type="button" onClick={submitToEngraving}>
+          Submit to Install
+        </SubmitButton>
       </EngravingForm>
     </EngravingContainer>
   );
@@ -39,10 +74,10 @@ const EngravingContainer = styled.div`
   border-radius: 10px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
-  width:80%;
+  width: 80%;
   margin-left: auto;
   margin-right: auto;
-  h3{
+  h3 {
     font-size: 24px;
   }
 `;
@@ -66,16 +101,16 @@ const ImageInput = styled.input`
 
 const ImagePreview = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 `;
 
 const Thumbnail = styled.img`
-  max-width: 100%;
-  max-height: 200px;
-  object-fit: contain;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
   border-radius: 5px;
+  margin: 10px;
 `;
 
 const SubmitButton = styled.button`

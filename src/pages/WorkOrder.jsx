@@ -10,23 +10,31 @@ import IconPrint from "../assets/icons/printing.png";
 import ArtComponent from "../components/ArtComponent";
 import EngravingArt from "../components/EngravingArt";
 import InstallationForm from "../components/InstallationForm";
+import html2canvas from "html2canvas";
 
 const WorkOrder = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+  const [formData, setFormData] = useState({
+    headStoneName: "",
+    invoiceNo: "",
+    date: "",
+    customerEmail: "",
+    customerName: "",
+    customerPhone: "",
+    cemeteryName: "",
+    cemeteryAddress: "",
+    cemeteryContact: "",
+    lotNumber: "",
+  });
   const location = useLocation();
-  const {
-    headStoneName,
-    invoiceNo,
-    date,
-    customerEmail,
-    customerName,
-    customerPhone,
-    cemeteryName,
-    cemeteryAddress,
-    cemeteryContact,
-    lotNumber,
-  } = location.state;
+
+  useEffect(() => {
+    // Check if location.state is available
+    if (location.state) {
+      setFormData(location.state);
+    }
+  }, [location.state]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -49,17 +57,77 @@ const WorkOrder = () => {
     window.print();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Process the form data or make API calls here
-    console.log("Form Data:");
+    try {
+      // Capture the form as an image using html2canvas
+      const canvas = await html2canvas(document.getElementById("work-order"));
+
+      // Convert the captured canvas to a Blob
+      canvas.toBlob(async (blob) => {
+        // Create a FormData object to send data to the server
+        const formDataToSend = new FormData();
+        formDataToSend.append("invoiceNo", formData.invoiceNo);
+        formDataToSend.append("workOrder", blob, `${formData.invoiceNo}.png`);
+
+        // Make a POST API call to the /work-order endpoint
+        const response = await fetch("http://localhost:3000/work-order", {
+          method: "POST",
+          body: formDataToSend,
+        });
+
+        if (response.ok) {
+          console.log("Work order submission successful!");
+          // Optionally, you can redirect or show a success message here
+        } else {
+          console.error("Work order submission failed.");
+          // Handle the error, show an error message, or retry the submission
+        }
+      }, "image/png");
+    } catch (error) {
+      console.error("Error while submitting work order:", error);
+      // Handle the error, show an error message, or retry the submission
+    }
+  };
+
+  const submitToCemetery = async () => {
+    try {
+      const formDataToSend = new FormData();
+
+      // Append all form data fields
+      for (const key in formData) {
+        formDataToSend.append(key, formData[key]);
+      }
+
+      // Append image files with the correct field name "images"
+      uploadedImages.forEach((image, index) => {
+        formDataToSend.append("images", image); // Use "images" as the field name
+      });
+
+      // Make the API call
+      const response = await fetch("http://localhost:3000/submit-to-cemetery", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (response.ok) {
+        console.log("Submission to Cemetery successful!");
+        // Optionally, you can redirect or show a success message here
+      } else {
+        console.error("Submission to Cemetery failed.");
+        // Handle the error, show an error message, or retry the submission
+      }
+    } catch (error) {
+      console.error("Error while submitting to Cemetery:", error);
+      // Handle the error, show an error message, or retry the submission
+    }
   };
 
   return (
     <Container>
       <form onSubmit={handleSubmit}>
         <NavBar className="nav-bar">
-          <StyledLink to="/">
+          <StyledLink to="/landing-page">
             <IconWithText iconSrc={IconHome} text="Home" />
           </StyledLink>
           <UtilityContainer>
@@ -71,74 +139,89 @@ const WorkOrder = () => {
             />
           </UtilityContainer>
         </NavBar>
-        <Header>
-          <HeadstoneName>{headStoneName}</HeadstoneName>
-          <Details>
-            <Detail>
-              <DetailTitle>Invoice No:</DetailTitle>
-              <DetailValue>{invoiceNo}</DetailValue>
-            </Detail>
-            <Detail>
-              <DetailTitle>Date:</DetailTitle>
-              <DetailValue>{date}</DetailValue>
-            </Detail>
-          </Details>
-          <CustomerDetails>
-            <Detail>
-              <DetailTitle>Customer Name:</DetailTitle>
-              <DetailValue>{customerName}</DetailValue>
-            </Detail>
-            <Detail>
-              <DetailTitle>Email:</DetailTitle>
-              <DetailValue>{customerEmail}</DetailValue>
-            </Detail>
-            <Detail>
-              <DetailTitle>Phone Number:</DetailTitle>
-              <DetailValue>{customerPhone}</DetailValue>
-            </Detail>
-          </CustomerDetails>
-        </Header>
-        <CustomerDesign>
-          <SectionTitle>Customer Design Approval</SectionTitle>
-          <DesignForm>
-            <InputLabel>Design Approved by Customer</InputLabel>
-            <ImageInput
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              required
+        <div id="work-order">
+          <Header>
+            <HeadstoneName>{formData.headStoneName}</HeadstoneName>
+            <Details>
+              <Detail>
+                <DetailTitle>Invoice No:</DetailTitle>
+                <DetailValue>{formData.invoiceNo}</DetailValue>
+              </Detail>
+              <Detail>
+                <DetailTitle>Date:</DetailTitle>
+                <DetailValue>{formData.date}</DetailValue>
+              </Detail>
+            </Details>
+            <CustomerDetails>
+              <Detail>
+                <DetailTitle>Customer Name:</DetailTitle>
+                <DetailValue>{formData.customerName}</DetailValue>
+              </Detail>
+              <Detail>
+                <DetailTitle>Email:</DetailTitle>
+                <DetailValue>{formData.customerEmail}</DetailValue>
+              </Detail>
+              <Detail>
+                <DetailTitle>Phone Number:</DetailTitle>
+                <DetailValue>{formData.customerPhone}</DetailValue>
+              </Detail>
+            </CustomerDetails>
+          </Header>
+          <CustomerDesign>
+            <SectionTitle>Customer Design Approval</SectionTitle>
+            <DesignForm>
+              <InputLabel>Design Approved by Customer</InputLabel>
+              <ImageInput
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                required
+              />
+
+              <ImagePreview>
+                {previewImages.map((image, index) => (
+                  <Thumbnail key={index} src={image} />
+                ))}
+              </ImagePreview>
+              <SubmitButton type="button" onClick={submitToCemetery}>
+                Submit to Cemetery
+              </SubmitButton>
+            </DesignForm>
+          </CustomerDesign>
+          <ArtComponent
+            headStoneName={formData.headStoneName}
+            invoiceNo={formData.invoiceNo}
+          />
+          <EngravingArt
+            headStoneName={formData.headStoneName}
+            invoiceNo={formData.invoiceNo}
+          />
+          <CemeteryInfo>
+            <SectionTitle>Cemetery Information</SectionTitle>
+            <CemeteryDetail>
+              <DetailTitle>Cemetery Name:</DetailTitle>
+              <DetailValue>{formData.cemeteryName}</DetailValue>
+            </CemeteryDetail>
+            <CemeteryDetail>
+              <DetailTitle>Cemetery Address:</DetailTitle>
+              <DetailValue>{formData.cemeteryAddress}</DetailValue>
+            </CemeteryDetail>
+            <CemeteryDetail>
+              <DetailTitle>Cemetery Contact:</DetailTitle>
+              <DetailValue>{formData.cemeteryContact}</DetailValue>
+            </CemeteryDetail>
+            <CemeteryDetail>
+              <DetailTitle>Lot Number:</DetailTitle>
+              <DetailValue>{formData.lotNumber}</DetailValue>
+            </CemeteryDetail>
+            <InstallationForm
+              headStoneName={formData.headStoneName}
+              invoiceNo={formData.invoiceNo}
             />
-            <ImagePreview>
-              {previewImages.map((image, index) => (
-                <Thumbnail key={index} src={image} />
-              ))}
-            </ImagePreview>
-            <SubmitButton type="submit">Submit to Cemetery</SubmitButton>
-          </DesignForm>
-        </CustomerDesign>
-        <ArtComponent />
-        <EngravingArt />
-        <CemeteryInfo>
-          <SectionTitle>Cemetery Information</SectionTitle>
-          <CemeteryDetail>
-            <DetailTitle>Cemetery Name:</DetailTitle>
-            <DetailValue>{cemeteryName}</DetailValue>
-          </CemeteryDetail>
-          <CemeteryDetail>
-            <DetailTitle>Cemetery Address:</DetailTitle>
-            <DetailValue>{cemeteryAddress}</DetailValue>
-          </CemeteryDetail>
-          <CemeteryDetail>
-            <DetailTitle>Cemetery Contact:</DetailTitle>
-            <DetailValue>{cemeteryContact}</DetailValue>
-          </CemeteryDetail>
-          <CemeteryDetail>
-            <DetailTitle>Lot Number:</DetailTitle>
-            <DetailValue>{lotNumber}</DetailValue>
-          </CemeteryDetail>
-          <InstallationForm />
-        </CemeteryInfo>
+          </CemeteryInfo>
+        </div>
       </form>
     </Container>
   );
@@ -232,7 +315,7 @@ const DetailValue = styled.p`
 `;
 
 const CustomerDesign = styled.div`
-  width:80%;
+  width: 80%;
   margin-left: auto;
   margin-right: auto;
   background: #57facb;
@@ -248,7 +331,7 @@ const SectionTitle = styled.h3`
   margin-bottom: 15px;
 `;
 
-const DesignForm = styled.form`
+const DesignForm = styled.div`
   margin-top: 20px;
 `;
 
@@ -295,7 +378,7 @@ const SubmitButton = styled.button`
 
 const CemeteryInfo = styled.div`
   background: #f5f5f5;
-  width:80%;
+  width: 80%;
   margin: 20px auto;
   padding: 20px;
   border-radius: 10px;

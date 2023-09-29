@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "react-modal";
 import styled from "styled-components";
 import images from "../utils/images";
@@ -58,16 +58,33 @@ const ModalContainer = styled.div`
     }
   }
 
-  button {
-    padding: 8px 16px;
-    background-color: #ccc;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  .button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
 
-    &:hover {
-      background-color: #999;
+    button {
+      padding: 8px 16px;
+      background-color: #ccc;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #999;
+      }
+    }
+
+    .selected {
+      background-color: #007bff;
+      color: #fff;
+      font-weight: bold;
+
+      &:hover {
+        background-color: #0056b3;
+      }
     }
   }
 
@@ -83,6 +100,31 @@ const ModalContainer = styled.div`
 `;
 
 const ImageModal = ({ isOpen, closeModal, handleImageSelect }) => {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const filterImagesByCategory = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const filteredImages =
+    selectedCategory === "all"
+      ? images
+      : images.filter((image) => image.type === selectedCategory);
+
+  const categories = [
+    "all",
+    "bench",
+    "crosses",
+    "hearts",
+    "legacy",
+    "markers",
+    "plural",
+    "slanted",
+    "standard",
+    "statue",
+    "vases",
+  ];
+
   return (
     <Modal
       isOpen={isOpen}
@@ -104,8 +146,19 @@ const ImageModal = ({ isOpen, closeModal, handleImageSelect }) => {
           &times;
         </button>
         <h2>Select a Model</h2>
+        <div className="button-container">
+          {categories.map((category, index) => (
+            <button
+              key={index}
+              className={selectedCategory === category ? "selected" : ""}
+              onClick={() => filterImagesByCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
         <div className="image-gallery">
-          {images.map((image, index) => {
+          {filteredImages.map((image, index) => {
             return (
               <div key={index} className="image-container">
                 <img src={image.src} alt={`Model ${index + 1}`} />
