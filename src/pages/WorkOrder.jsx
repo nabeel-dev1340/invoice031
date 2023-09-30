@@ -74,6 +74,9 @@ const WorkOrder = () => {
         // Make a POST API call to the /work-order endpoint
         const response = await fetch(`${process.env.REACT_APP_API_URL}/work-order`, {
           method: "POST",
+          headers:{
+            "ngrok-skip-browser-warning": "69420",
+          },
           body: formDataToSend,
         });
 
@@ -109,6 +112,9 @@ const WorkOrder = () => {
       // Make the API call
       const response = await fetch(`${process.env.REACT_APP_API_URL}/submit-to-cemetery`, {
         method: "POST",
+        headers:{
+          "ngrok-skip-browser-warning": "69420",
+        },
         body: formDataToSend,
       });
 

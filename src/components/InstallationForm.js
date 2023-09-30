@@ -53,6 +53,9 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
         `${process.env.REACT_APP_API_URL}/foundation-submission`,
         {
           method: "POST",
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
           body: formDataToSend,
         }
       );

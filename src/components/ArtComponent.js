@@ -51,6 +51,9 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
         `${process.env.REACT_APP_API_URL}/art-submission`,
         {
           method: "POST",
+          headers:{
+            "ngrok-skip-browser-warning": "69420",
+          },
           body: formDataToSend,
         }
       );
