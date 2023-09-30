@@ -15,7 +15,8 @@ import html2canvas from "html2canvas";
 const WorkOrder = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
-  const [submissionSuccess, setSubmissionSuccess]=useState(false)
+  const [submissionSuccess, setSubmissionSuccess]=useState(false);
+  const [workOrderSaved,setWorkOrderSaved]=useState(false);
   const [formData, setFormData] = useState({
     headStoneName: "",
     invoiceNo: "",
@@ -78,6 +79,7 @@ const WorkOrder = () => {
 
         if (response.ok) {
           console.log("Work order submission successful!");
+          setWorkOrderSaved(true)
           // Optionally, you can redirect or show a success message here
         } else {
           console.error("Work order submission failed.");
@@ -122,6 +124,10 @@ const WorkOrder = () => {
       console.error("Error while submitting to Cemetery:", error);
       // Handle the error, show an error message, or retry the submission
     }
+  };
+
+  const closeModal = () => {
+    setWorkOrderSaved(false);
   };
 
   return (
@@ -224,6 +230,14 @@ const WorkOrder = () => {
           </CemeteryInfo>
         </div>
       </form>
+      {workOrderSaved && (
+        <SuccessModal>
+          <SuccessModalContent>
+            <h2>Work Order Saved Successfully</h2>
+            <button onClick={closeModal}>Close</button>
+          </SuccessModalContent>
+        </SuccessModal>
+      )}
     </Container>
   );
 };
@@ -395,5 +409,48 @@ const CemeteryDetail = styled.div`
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
+  }
+`;
+
+const SuccessModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const SuccessModalContent = styled.div`
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  max-width: 400px; /* Adjust the width as needed */
+  text-align: center;
+
+  h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #0056b3;
+    }
   }
 `;

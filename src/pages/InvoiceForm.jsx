@@ -885,6 +885,10 @@ const AccountsSection = styled.section`
     align-items: center;
     gap: 5px;
   }
+
+  #details{
+    padding: 5px;
+  }
   .grey-highlight {
     background-color: #b9b3b3;
   }

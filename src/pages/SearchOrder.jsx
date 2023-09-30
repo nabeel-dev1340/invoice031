@@ -63,8 +63,8 @@ const SearchOrder = () => {
         <ResultsContainer>
           <ResultsHeading>Search Results:</ResultsHeading>
           <ResultsGrid>
-            {searchResults.map((result) => (
-              <ResultTile key={result.invoiceNo}>
+            {searchResults.map((result,index) => (
+              <ResultTile key={result.invoiceNo} even={index % 2 === 0}>
                 <TileHeading>{result.headstoneName}</TileHeading>
                 <TileInfo>Invoice No: {result.invoiceNo}</TileInfo>
                 <ViewOrderButton onClick={() => openImagePopup(result.image)}>
@@ -117,6 +117,8 @@ const Heading = styled.h1`
   font-size: 28px;
   color: #333;
   margin-bottom: 20px;
+  text-align: center;
+  margin-top: 20px;
 `;
 
 const SearchBar = styled.div`
@@ -124,6 +126,7 @@ const SearchBar = styled.div`
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+  padding: 0 10px;
 
   input {
     flex: 1;
@@ -177,7 +180,7 @@ const ResultsGrid = styled.div`
 `;
 
 const ResultTile = styled.div`
-  background: #fff;
+  background: ${(props) => (props.even ? "#eec843" : "#57facb")};
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -236,11 +239,11 @@ const ImagePopupContent = styled.div`
   border-radius: 5px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   position: relative;
-  max-width: 80%; /* Limit the width of the popup */
+  max-width: 100%; /* Limit the width of the popup */
 `;
 
 const ScrollableImageContainer = styled.div`
-  max-height: 80vh; /* Set a maximum height for scrollability */
+  max-height: 90vh; /* Set a maximum height for scrollability */
   overflow-y: auto; /* Enable vertical scrolling when needed */
   margin-top: 10px;
 `;
