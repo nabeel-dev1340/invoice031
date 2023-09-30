@@ -18,7 +18,7 @@ const SearchOrder = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/work-orders?headstoneName=${searchTerm}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/work-orders?headstoneName=${searchTerm}`);
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data);

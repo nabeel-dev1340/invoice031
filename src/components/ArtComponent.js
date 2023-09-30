@@ -47,10 +47,13 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
       }
 
       // Make a POST request to your API endpoint
-      const response = await fetch("http://localhost:3000/art-submission", {
-        method: "POST",
-        body: formDataToSend,
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/art-submission`,
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
 
       if (response.ok) {
         // Handle successful response (e.g., show a success message)

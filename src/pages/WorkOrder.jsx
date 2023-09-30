@@ -72,7 +72,7 @@ const WorkOrder = () => {
         formDataToSend.append("workOrder", blob, `${formData.headStoneName}..${formData.invoiceNo}.png`);
 
         // Make a POST API call to the /work-order endpoint
-        const response = await fetch("http://localhost:3000/work-order", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/work-order`, {
           method: "POST",
           body: formDataToSend,
         });
@@ -107,7 +107,7 @@ const WorkOrder = () => {
       });
 
       // Make the API call
-      const response = await fetch("http://localhost:3000/submit-to-cemetery", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/submit-to-cemetery`, {
         method: "POST",
         body: formDataToSend,
       });

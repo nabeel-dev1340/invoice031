@@ -241,7 +241,7 @@ const InvoicehtmlForm = () => {
     try {
       // Make an API call to save the PDF and additional data on the backend
       const response = await axios.post(
-        "http://localhost:3000/save-invoice", // Replace with your backend API endpoint
+        `${process.env.REACT_APP_API_URL}/save-invoice`, // Replace with your backend API endpoint
         finalFormData,
         {
           headers: {

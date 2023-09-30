@@ -24,7 +24,7 @@ const EngravingArt = ({ headStoneName, invoiceNo }) => {
 
       // Make a POST request to your API endpoint
       const response = await fetch(
-        "http://localhost:3000/engraving-submission",
+        `${process.env.REACT_APP_API_URL}/engraving-submission`,
         {
           method: "POST",
           body: formDataToSend,

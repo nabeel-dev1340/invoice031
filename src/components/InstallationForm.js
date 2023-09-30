@@ -50,7 +50,7 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
 
       // Make a POST request to your API endpoint
       const response = await fetch(
-        "http://localhost:3000/foundation-submission",
+        `${process.env.REACT_APP_API_URL}/foundation-submission`,
         {
           method: "POST",
           body: formDataToSend,
