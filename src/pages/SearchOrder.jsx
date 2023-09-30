@@ -18,7 +18,13 @@ const SearchOrder = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/work-orders?headstoneName=${searchTerm}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/work-orders?headstoneName=${searchTerm}`, {
+        method: "GET",
+        headers: {
+          "ngrok-skip-browser-warning": "69420",
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data);
