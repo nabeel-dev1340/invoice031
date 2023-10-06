@@ -1,12 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 import HorizontalRule from "./HorizontalRule";
-import Logo from "../assets/images/memorial.png";
 
 const BrandingSection = () => {
   return (
     <BrandingContainer>
-      <BrandingLogo src={Logo} alt="branding" />
       <Branding>HEADSTONE WORLD</Branding>
       <BrandingInfo>
         <p>713-597-8899</p>

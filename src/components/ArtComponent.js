@@ -4,6 +4,8 @@ import styled from "styled-components";
 const ArtComponent = ({ headStoneName, invoiceNo }) => {
   const [finalArtImages, setFinalArtImages] = useState([]);
   const [finalArtPreviews, setFinalArtPreviews] = useState([]);
+  const [cemeteryApprovalImagePreview, setCemeteryApprovalImagePreview] =
+    useState(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [cemeteryApprovalImage, setCemeteryApprovalImage] = useState(null);
 
@@ -17,11 +19,19 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
       URL.createObjectURL(file)
     );
     setFinalArtPreviews(imagePreviews);
+    if (cemeteryApprovalImage) {
+      setCemeteryApprovalImagePreview(
+        URL.createObjectURL(cemeteryApprovalImage)
+      );
+    }
 
     return () => {
       imagePreviews.forEach(URL.revokeObjectURL);
+      if (cemeteryApprovalImage) {
+        URL.revokeObjectURL(cemeteryApprovalImagePreview);
+      }
     };
-  }, [finalArtImages]);
+  }, [finalArtImages, cemeteryApprovalImage]);
 
   const handleCemeteryApprovalUpload = (e) => {
     const file = e.target.files[0];
@@ -51,7 +61,7 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
         `${process.env.REACT_APP_API_URL}/art-submission`,
         {
           method: "POST",
-          headers:{
+          headers: {
             "ngrok-skip-browser-warning": "69420",
           },
           body: formDataToSend,
@@ -96,6 +106,11 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
           onChange={handleCemeteryApprovalUpload}
           required
         />
+        <ImagePreview>
+          {cemeteryApprovalImage && (
+            <Thumbnail src={cemeteryApprovalImagePreview} />
+          )}
+        </ImagePreview>
         <SubmitButton
           type="button"
           onClick={handleArtSubmission}

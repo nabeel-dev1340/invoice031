@@ -11,7 +11,7 @@ const LandingPage = () => {
     return (
       <LandingPageContainer>
         <Branding>
-          <HeadingImage src={headingImage} alt="Headstone World" />
+          {/* <HeadingImage src={headingImage} alt="Headstone World" /> */}
           <Heading>Welcome to Headstone World</Heading>
         </Branding>
         <OptionContainer>

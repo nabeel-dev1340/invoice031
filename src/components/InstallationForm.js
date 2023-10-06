@@ -6,6 +6,8 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
   const [foundationInstallPreviews, setFoundationInstallPreviews] = useState(
     []
   );
+  const [monumentSettingImagePreview, setMonumentSettingImagePreview] =
+    useState(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [monumentSettingImage, setMonumentSettingImage] = useState(null);
 
@@ -19,11 +21,17 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
       URL.createObjectURL(file)
     );
     setFoundationInstallPreviews(imagePreviews);
+    if (monumentSettingImage) {
+      setMonumentSettingImagePreview(URL.createObjectURL(monumentSettingImage));
+    }
 
     return () => {
       imagePreviews.forEach(URL.revokeObjectURL);
+      if (monumentSettingImage) {
+        URL.revokeObjectURL(monumentSettingImagePreview);
+      }
     };
-  }, [foundationInstallImages]);
+  }, [foundationInstallImages, monumentSettingImage]);
 
   const handleMonumentSettingUpload = (e) => {
     const file = e.target.files[0];
@@ -93,6 +101,11 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
         accept="image/*"
         onChange={handleMonumentSettingUpload}
       />
+      <ImagePreview>
+        {monumentSettingImage && (
+          <Thumbnail src={monumentSettingImagePreview} />
+        )}
+      </ImagePreview>
       <SubmitButton
         type="button"
         onClick={handleUpload}

@@ -62,27 +62,42 @@ const WorkOrder = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Hide the input elements before capturing the screenshot
+      const inputElements = document.querySelectorAll("input[type='file']");
+      inputElements.forEach((input) => {
+        input.style.display = "none";
+      });
+  
       // Capture the form as an image using html2canvas
       const canvas = await html2canvas(document.getElementById("work-order"));
-
+  
+      // Restore the visibility of input elements
+      inputElements.forEach((input) => {
+        input.style.display = "block";
+      });
+  
       // Convert the captured canvas to a Blob
       canvas.toBlob(async (blob) => {
         // Create a FormData object to send data to the server
         const formDataToSend = new FormData();
-        formDataToSend.append("workOrder", blob, `${formData.headStoneName}..${formData.invoiceNo}.png`);
-
+        formDataToSend.append(
+          "workOrder",
+          blob,
+          `${formData.headStoneName}..${formData.invoiceNo}.png`
+        );
+  
         // Make a POST API call to the /work-order endpoint
         const response = await fetch(`${process.env.REACT_APP_API_URL}/work-order`, {
           method: "POST",
-          headers:{
+          headers: {
             "ngrok-skip-browser-warning": "69420",
           },
           body: formDataToSend,
         });
-
+  
         if (response.ok) {
           console.log("Work order submission successful!");
-          setWorkOrderSaved(true)
+          setWorkOrderSaved(true);
           // Optionally, you can redirect or show a success message here
         } else {
           console.error("Work order submission failed.");
@@ -94,7 +109,7 @@ const WorkOrder = () => {
       // Handle the error, show an error message, or retry the submission
     }
   };
-
+  
   const submitToCemetery = async () => {
     try {
       const formDataToSend = new FormData();

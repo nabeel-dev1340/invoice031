@@ -21,9 +21,12 @@ import html2canvas from "html2canvas";
 const InvoicehtmlForm = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [successModalIsOpen, setSuccessModalIsOpen] = useState(false);
+  const [saveButtonText, setSaveButtonText] = useState("Save");
+  const [modalIndex, setModalIndex] = useState(0);
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (index) => {
     setModalIsOpen(true);
+    setModalIndex(index);
   };
 
   const handleCloseModal = () => {
@@ -38,14 +41,33 @@ const InvoicehtmlForm = () => {
     setSuccessModalIsOpen(false);
   };
 
-  const handleImageSelect = (imageSrc, imageTitle) => {
+  const handleImageSelect = (imageSrc, imageTitle, modelIndex) => {
     // Update the selected model image in your form data
-    setFormData((prevData) => ({
-      ...prevData,
-      model: imageSrc,
-      selectModelImage: imageTitle,
-    }));
-
+    if (modelIndex === 1) {
+      setFormData((prevData) => ({
+        ...prevData,
+        model1: imageSrc,
+        selectModelImage1: imageTitle,
+      }));
+    } else if (modelIndex === 2) {
+      setFormData((prevData) => ({
+        ...prevData,
+        model2: imageSrc,
+        selectModelImage2: imageTitle,
+      }));
+    } else if (modelIndex === 3) {
+      setFormData((prevData) => ({
+        ...prevData,
+        model3: imageSrc,
+        selectModelImage3: imageTitle,
+      }));
+    } else if (modelIndex === 4) {
+      setFormData((prevData) => ({
+        ...prevData,
+        model4: imageSrc,
+        selectModelImage4: imageTitle,
+      }));
+    }
     handleCloseModal();
   };
 
@@ -96,12 +118,12 @@ const InvoicehtmlForm = () => {
     customerName: "",
     customerPhone: "",
     customerEmail: "",
-    model: "",
-    selectModelImage: "",
-    modelColor: "",
-    modelQty: "",
-    modelPrice: "",
-    subTotal: "",
+    model1: "",
+    selectModelImage1: "",
+    modelColor1: "",
+    modelQty1: "",
+    modelPrice1: "",
+    subTotal: 0,
     tax: "",
     delivery: "",
     foundation: "",
@@ -110,6 +132,25 @@ const InvoicehtmlForm = () => {
     deposit: "",
     balance: "",
     details: "",
+    model2: "",
+    selectModelImage2: "",
+    modelColor2: "",
+    modelQty2: "",
+    modelPrice2: "",
+    model3: "",
+    selectModelImage3: "",
+    modelColor3: "",
+    modelQty3: "",
+    modelPrice3: "",
+    model4: "",
+    selectModelImage4: "",
+    modelColor4: "",
+    modelQty4: "",
+    modelPrice4: "",
+    model5: "",
+    modelColor5: "",
+    modelQty5: "",
+    modelPrice5: "",
   });
 
   const handleInputChange = (e) => {
@@ -130,15 +171,26 @@ const InvoicehtmlForm = () => {
       }
     }
 
-    // Calculate subtotal when modelQty or modelPrice changes
-    if (name === "modelQty" || name === "modelPrice") {
-      const quantity = parseFloat(updatedFormData.modelQty);
-      const price = parseFloat(updatedFormData.modelPrice);
+    // Calculate subtotal when modelQty or modelPrice changes for all 4 models
+    for (let i = 1; i <= 5; i++) {
+      const qtyName = `modelQty${i}`;
+      const priceName = `modelPrice${i}`;
 
-      if (!isNaN(quantity) && !isNaN(price)) {
-        updatedFormData.subTotal = (quantity * price).toFixed(2);
-      } else {
-        updatedFormData.subTotal = "";
+      if (name === qtyName || name === priceName) {
+        const quantity = parseFloat(updatedFormData[qtyName]);
+        const price = parseFloat(updatedFormData[priceName]);
+
+        if (!isNaN(quantity) && !isNaN(price)) {
+          updatedFormData.subTotal = 0; // Reset subtotal
+          for (let j = 1; j <= 5; j++) {
+            const subQty = parseFloat(updatedFormData[`modelQty${j}`]);
+            const subPrice = parseFloat(updatedFormData[`modelPrice${j}`]);
+            if (!isNaN(subQty) && !isNaN(subPrice)) {
+              updatedFormData.subTotal += subQty * subPrice;
+            }
+          }
+          updatedFormData.subTotal = updatedFormData.subTotal.toFixed(2);
+        }
       }
     }
 
@@ -194,6 +246,7 @@ const InvoicehtmlForm = () => {
   };
 
   const captureFormSnapshot = async () => {
+    setSaveButtonText("Saving..");
     const pdf = new jsPDF({
       unit: "mm", // Use millimeters as the unit of measurement
       format: "a4", // Set the paper size to A4
@@ -256,25 +309,20 @@ const InvoicehtmlForm = () => {
         console.log("PDF and data saved successfully");
         // Show success modal
         handleSuccessModalOpen();
+        setSaveButtonText("Saved");
       } else {
         console.error("Failed to save PDF and data");
+        setSaveButtonText("Save");
       }
     } catch (error) {
       console.error("Error while saving PDF and data:", error);
+      setSaveButtonText("Save");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Process the form data or make API calls here
-    // console.log("Form Data:", formData);
-    // // Capture the form snapshot as a PDF
-    // await captureFormSnapshot();
     try {
-      // const res = await axios.post("http://localhost:3000/invoice", formData);
-      // console.log(res.data);
-      // Process the form data or make API calls here
-      console.log("Form Data:", formData);
       // Capture the form snapshot as a PDF
       await captureFormSnapshot();
     } catch (error) {
@@ -290,7 +338,11 @@ const InvoicehtmlForm = () => {
             <IconWithText iconSrc={IconHome} text="Home" />
           </StyledLink>
           <UtilityContainer>
-            <IconWithText iconSrc={IconSave} type="submit" text="Save" />
+            <IconWithText
+              iconSrc={IconSave}
+              type="submit"
+              text={saveButtonText}
+            />
             <IconWithText
               iconSrc={IconPrint}
               onClick={handlePrint}
@@ -329,7 +381,6 @@ const InvoicehtmlForm = () => {
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                required
               />
             </div>
           </HeadstoneInfoSection>
@@ -398,7 +449,6 @@ const InvoicehtmlForm = () => {
                 value={formData.lotOwner}
                 onChange={handleInputChange}
                 placeholder="Enter Lot"
-                required
               />
               <label htmlFor="lotNumber">Lot Number:</label>
               <input
@@ -408,7 +458,6 @@ const InvoicehtmlForm = () => {
                 value={formData.lotNumber}
                 onChange={handleInputChange}
                 placeholder="Enter lot number"
-                required
               />
             </div>
           </CemetrySection>
@@ -423,7 +472,6 @@ const InvoicehtmlForm = () => {
                 value={formData.customerName}
                 onChange={handleInputChange}
                 placeholder="Enter customer name"
-                required
               />
               <label htmlFor="phone">Phone:</label>
               <input
@@ -433,7 +481,6 @@ const InvoicehtmlForm = () => {
                 value={formData.customerPhone}
                 onChange={handleInputChange}
                 placeholder="Enter customer phone"
-                required
               />
             </div>
             <div className="row">
@@ -445,7 +492,6 @@ const InvoicehtmlForm = () => {
                 value={formData.customerEmail}
                 onChange={handleInputChange}
                 placeholder="Enter customer email"
-                required
               />
             </div>
           </CustomerDetailsSection>
@@ -454,14 +500,17 @@ const InvoicehtmlForm = () => {
             <div className="model-row">
               <div className="model-input model-flex">
                 <label htmlFor="model">Model:</label>
-                <SelectModelButton type="button" onClick={handleOpenModal}>
+                <SelectModelButton
+                  type="button"
+                  onClick={() => handleOpenModal(1)}
+                >
                   Select Model
                 </SelectModelButton>
               </div>
-              {formData.model !== "" && (
+              {formData.model1 !== "" && (
                 <div className="selected-image">
                   <img
-                    src={formData.model}
+                    src={formData.model1}
                     style={{ width: "70px", height: "50px" }}
                     alt="Selected Model"
                   />
@@ -471,10 +520,9 @@ const InvoicehtmlForm = () => {
                 <label htmlFor="model-color">Color:</label>
                 <select
                   id="model-color"
-                  name="modelColor"
-                  value={formData.modelColor}
+                  name="modelColor1"
+                  value={formData.modelColor1}
                   onChange={handleInputChange}
-                  required
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -483,12 +531,12 @@ const InvoicehtmlForm = () => {
                     </option>
                   ))}
                 </select>
-                {formData.modelColor && (
+                {formData.modelColor1 && (
                   <div
                     style={{
                       width: "40px",
                       height: "40px",
-                      backgroundColor: colorOptions[formData.modelColor],
+                      backgroundColor: colorOptions[formData.modelColor1],
                     }}
                   />
                 )}
@@ -497,20 +545,270 @@ const InvoicehtmlForm = () => {
                 <label htmlFor="model-qty">Qty:</label>
                 <input
                   type="number"
-                  name="modelQty"
+                  name="modelQty1"
                   min={1}
-                  value={formData.modelQty}
+                  value={formData.modelQty1}
                   onChange={handleInputChange}
                   placeholder="Enter Quantity"
-                  required
                 />
               </div>
               <div className="model-price model-flex">
                 <label htmlFor="model-price">Price:</label>
                 <input
                   type="text"
-                  name="modelPrice"
-                  value={formData.modelPrice}
+                  name="modelPrice1"
+                  value={formData.modelPrice1}
+                  onChange={handleInputChange}
+                  placeholder="Enter Price"
+                />
+              </div>
+            </div>
+            <div className="model-row">
+              <div className="model-input model-flex">
+                <label htmlFor="model">Model:</label>
+                <SelectModelButton
+                  type="button"
+                  onClick={() => handleOpenModal(2)}
+                >
+                  Select Model
+                </SelectModelButton>
+              </div>
+              {formData.model2 !== "" && (
+                <div className="selected-image">
+                  <img
+                    src={formData.model2}
+                    style={{ width: "70px", height: "50px" }}
+                    alt="Selected Model"
+                  />
+                </div>
+              )}
+              <div className="model-color model-flex">
+                <label htmlFor="model-color">Color:</label>
+                <select
+                  id="model-color"
+                  name="modelColor2"
+                  value={formData.modelColor2}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Color</option>
+                  {Object.keys(colorOptions).map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </select>
+                {formData.modelColor2 && (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: colorOptions[formData.modelColor2],
+                    }}
+                  />
+                )}
+              </div>
+              <div className="model-qty model-flex">
+                <label htmlFor="model-qty">Qty:</label>
+                <input
+                  type="number"
+                  name="modelQty2"
+                  min={1}
+                  value={formData.modelQty2}
+                  onChange={handleInputChange}
+                  placeholder="Enter Quantity"
+                />
+              </div>
+              <div className="model-price model-flex">
+                <label htmlFor="model-price">Price:</label>
+                <input
+                  type="text"
+                  name="modelPrice2"
+                  value={formData.modelPrice2}
+                  onChange={handleInputChange}
+                  placeholder="Enter Price"
+                />
+              </div>
+            </div>
+            <div className="model-row">
+              <div className="model-input model-flex">
+                <label htmlFor="model">Model:</label>
+                <SelectModelButton type="button" onClick={() => handleOpenModal(3)}>
+                  Select Model
+                </SelectModelButton>
+              </div>
+              {formData.model3 !== "" && (
+                <div className="selected-image">
+                  <img
+                    src={formData.model3}
+                    style={{ width: "70px", height: "50px" }}
+                    alt="Selected Model"
+                  />
+                </div>
+              )}
+              <div className="model-color model-flex">
+                <label htmlFor="model-color">Color:</label>
+                <select
+                  id="model-color"
+                  name="modelColor3"
+                  value={formData.modelColor3}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Color</option>
+                  {Object.keys(colorOptions).map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </select>
+                {formData.modelColor3 && (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: colorOptions[formData.modelColor3],
+                    }}
+                  />
+                )}
+              </div>
+              <div className="model-qty model-flex">
+                <label htmlFor="model-qty">Qty:</label>
+                <input
+                  type="number"
+                  name="modelQty3"
+                  min={1}
+                  value={formData.modelQty3}
+                  onChange={handleInputChange}
+                  placeholder="Enter Quantity"
+                />
+              </div>
+              <div className="model-price model-flex">
+                <label htmlFor="model-price">Price:</label>
+                <input
+                  type="text"
+                  name="modelPrice3"
+                  value={formData.modelPrice3}
+                  onChange={handleInputChange}
+                  placeholder="Enter Price"
+                />
+              </div>
+            </div>
+            <div className="model-row">
+              <div className="model-input model-flex">
+                <label htmlFor="model">Model:</label>
+                <SelectModelButton type="button" onClick={() => handleOpenModal(4)}>
+                  Select Model
+                </SelectModelButton>
+              </div>
+              {formData.model4 !== "" && (
+                <div className="selected-image">
+                  <img
+                    src={formData.model4}
+                    style={{ width: "70px", height: "50px" }}
+                    alt="Selected Model"
+                  />
+                </div>
+              )}
+              <div className="model-color model-flex">
+                <label htmlFor="model-color">Color:</label>
+                <select
+                  id="model-color"
+                  name="modelColor4"
+                  value={formData.modelColor4}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Color</option>
+                  {Object.keys(colorOptions).map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </select>
+                {formData.modelColor4 && (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: colorOptions[formData.modelColor4],
+                    }}
+                  />
+                )}
+              </div>
+              <div className="model-qty model-flex">
+                <label htmlFor="model-qty">Qty:</label>
+                <input
+                  type="number"
+                  name="modelQty4"
+                  min={1}
+                  value={formData.modelQty4}
+                  onChange={handleInputChange}
+                  placeholder="Enter Quantity"
+                />
+              </div>
+              <div className="model-price model-flex">
+                <label htmlFor="model-price">Price:</label>
+                <input
+                  type="text"
+                  name="modelPrice4"
+                  value={formData.modelPrice4}
+                  onChange={handleInputChange}
+                  placeholder="Enter Price"
+                />
+              </div>
+            </div>
+            <div className="model-row">
+              <div className="model-input model-flex">
+                <label htmlFor="model">Model:</label>
+                <input
+                  type="text"
+                  name="model5"
+                  value={formData.model5}
+                  onChange={handleInputChange}
+                  placeholder="Enter model"
+                  style={{ width: "108px" }}
+                />
+              </div>
+              <div className="model-color model-flex">
+                <label htmlFor="model-color">Color:</label>
+                <select
+                  id="model-color"
+                  name="modelColor5"
+                  value={formData.modelColor5}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Color</option>
+                  {Object.keys(colorOptions).map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </select>
+                {formData.modelColor5 && (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: colorOptions[formData.modelColor5],
+                    }}
+                  />
+                )}
+              </div>
+              <div className="model-qty model-flex">
+                <label htmlFor="model-qty">Qty:</label>
+                <input
+                  type="number"
+                  name="modelQty5"
+                  min={1}
+                  value={formData.modelQty5}
+                  onChange={handleInputChange}
+                  placeholder="Enter Quantity"
+                />
+              </div>
+              <div className="model-price model-flex">
+                <label htmlFor="model-price">Price:</label>
+                <input
+                  type="text"
+                  name="modelPrice5"
+                  value={formData.modelPrice5}
                   onChange={handleInputChange}
                   placeholder="Enter Price"
                 />
@@ -641,6 +939,7 @@ const InvoicehtmlForm = () => {
       </form>
       <ImageModal
         isOpen={modalIsOpen}
+        modalIndex={modalIndex}
         closeModal={handleCloseModal}
         handleImageSelect={handleImageSelect}
       />
@@ -703,7 +1002,7 @@ const HeadstoneInfoSection = styled.section`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 15px;
+    padding: 10px;
   }
 
   label {
@@ -756,11 +1055,11 @@ const HeadstoneInfoSection = styled.section`
 
 const CemetrySection = styled.div`
   background: #5887fb;
-  padding: 15px;
+  padding: 10px;
   .input-row {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
 
   .input-row label {
@@ -811,7 +1110,7 @@ const CemetrySection = styled.div`
 `;
 
 const CustomerDetailsSection = styled.section`
-  padding: 10px;
+  padding: 8px;
   background: #57facb;
   .row {
     display: flex;
@@ -829,7 +1128,7 @@ const CustomerDetailsSection = styled.section`
   .row input[type="text"],
   .row input[type="email"] {
     flex: 1;
-    padding: 8px;
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 3px;
     margin-top: 10px;
@@ -887,7 +1186,7 @@ const AccountsSection = styled.section`
     gap: 5px;
   }
 
-  #details{
+  #details {
     padding: 5px;
   }
   .grey-highlight {

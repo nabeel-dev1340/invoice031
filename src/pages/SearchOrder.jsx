@@ -57,7 +57,7 @@ const SearchOrder = () => {
       <SearchBar>
         <SearchInput
           type="text"
-          placeholder="Enter headstone name"
+          placeholder="Enter headstone name or invoice number"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

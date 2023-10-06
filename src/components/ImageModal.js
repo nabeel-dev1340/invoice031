@@ -99,7 +99,7 @@ const ModalContainer = styled.div`
   }
 `;
 
-const ImageModal = ({ isOpen, closeModal, handleImageSelect }) => {
+const ImageModal = ({ isOpen, closeModal, handleImageSelect, modalIndex }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const filterImagesByCategory = (category) => {
@@ -164,7 +164,7 @@ const ImageModal = ({ isOpen, closeModal, handleImageSelect }) => {
                 <img src={image.src} alt={`Model ${index + 1}`} />
                 <p>{image.title}</p>
                 <button
-                  onClick={() => handleImageSelect(image.src, image.title)}
+                  onClick={() => handleImageSelect(image.src, image.title, modalIndex)}
                 >
                   Select
                 </button>
