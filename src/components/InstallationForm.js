@@ -1,44 +1,69 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const InstallationForm = ({ headStoneName, invoiceNo }) => {
-  const [foundationInstallImages, setFoundationInstallImages] = useState([]);
-  const [foundationInstallPreviews, setFoundationInstallPreviews] = useState(
-    []
-  );
-  const [monumentSettingImagePreview, setMonumentSettingImagePreview] =
+const InstallationForm = ({
+  headStoneName,
+  invoiceNo,
+  foundationInstall,
+  monumentSetting,
+}) => {
+  const [foundationInstallImagesBase64, setFoundationInstallImagesBase64] =
+    useState([]);
+  const [monumentSettingImageBase64, setMonumentSettingImageBase64] =
     useState(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
-  const [monumentSettingImage, setMonumentSettingImage] = useState(null);
+
+  useEffect(() => {
+    if (foundationInstall) {
+      const extractedBase64Images = foundationInstall.map(
+        (item) => item?.base64Data
+      );
+      setFoundationInstallImagesBase64(extractedBase64Images);
+    }
+    if (monumentSetting) {
+      setMonumentSettingImageBase64(monumentSetting);
+    }
+  }, [foundationInstall, monumentSetting]);
 
   const handleFoundationInstallUpload = (e) => {
     const files = Array.from(e.target.files);
-    setFoundationInstallImages((prevImages) => [...prevImages, ...files]);
-  };
 
-  useEffect(() => {
-    const imagePreviews = foundationInstallImages.map((file) =>
-      URL.createObjectURL(file)
-    );
-    setFoundationInstallPreviews(imagePreviews);
-    if (monumentSettingImage) {
-      setMonumentSettingImagePreview(URL.createObjectURL(monumentSettingImage));
-    }
+    const loadImages = async () => {
+      for (const file of files) {
+        const reader = new FileReader();
 
-    return () => {
-      imagePreviews.forEach(URL.revokeObjectURL);
-      if (monumentSettingImage) {
-        URL.revokeObjectURL(monumentSettingImagePreview);
+        reader.onload = () => {
+          setFoundationInstallImagesBase64((prevImages) => [
+            ...prevImages,
+            reader.result,
+          ]);
+        };
+
+        reader.readAsDataURL(file);
       }
     };
-  }, [foundationInstallImages, monumentSettingImage]);
+
+    loadImages();
+  };
+
+  const removeFoundationImage = (index) => {
+    const updatedImages = [...foundationInstallImagesBase64];
+    updatedImages.splice(index, 1);
+    setFoundationInstallImagesBase64(updatedImages);
+  };
 
   const handleMonumentSettingUpload = (e) => {
     const file = e.target.files[0];
-    setMonumentSettingImage(file);
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setMonumentSettingImageBase64(reader.result);
+    };
+
+    reader.readAsDataURL(file);
   };
 
-  const handleUpload = async (e) => {
+  const submitToFoundation = async (e) => {
     e.preventDefault();
 
     try {
@@ -46,14 +71,24 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
       formDataToSend.append("headstoneName", headStoneName);
       formDataToSend.append("invoiceNo", invoiceNo);
 
-      // Append final art images
-      foundationInstallImages.forEach((file, index) => {
-        formDataToSend.append(`foundationInstallImages`, file);
+      // Append foundation install images
+      foundationInstallImagesBase64.forEach((base64Image, index) => {
+        const blob = dataURLtoBlob(base64Image);
+        formDataToSend.append(
+          `foundationInstallImages`,
+          blob,
+          `image${index}.png`
+        );
       });
 
-      // Append cemetery approval image
-      if (monumentSettingImage) {
-        formDataToSend.append("foundationInstallImages", monumentSettingImage);
+      // Append monument setting image
+      if (monumentSettingImageBase64) {
+        const blob = dataURLtoBlob(monumentSettingImageBase64);
+        formDataToSend.append(
+          "foundationInstallImages",
+          blob,
+          "monument-setting.png"
+        );
       }
 
       // Make a POST request to your API endpoint
@@ -91,8 +126,16 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
         onChange={handleFoundationInstallUpload}
       />
       <ImagePreview>
-        {foundationInstallPreviews.map((image, index) => (
-          <Thumbnail key={index} src={image} />
+        {foundationInstallImagesBase64.map((image, index) => (
+          <div key={index} className="thumbnail-container">
+            <span
+              className="delete-button"
+              onClick={() => removeFoundationImage(index)}
+            >
+              &#x2716;
+            </span>
+            <Thumbnail src={image} />
+          </div>
         ))}
       </ImagePreview>
       <InputLabel>Monument Setting</InputLabel>
@@ -102,16 +145,16 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
         onChange={handleMonumentSettingUpload}
       />
       <ImagePreview>
-        {monumentSettingImage && (
-          <Thumbnail src={monumentSettingImagePreview} />
+        {monumentSettingImageBase64 && (
+          <Thumbnail src={monumentSettingImageBase64} />
         )}
       </ImagePreview>
       <SubmitButton
         type="button"
-        onClick={handleUpload}
+        onClick={submitToFoundation}
         disabled={
-          foundationInstallImages.length <= 0 ||
-          monumentSettingImage === null ||
+          foundationInstallImagesBase64.length <= 0 ||
+          monumentSettingImageBase64 === null ||
           submissionSuccess
         }
       >
@@ -120,6 +163,20 @@ const InstallationForm = ({ headStoneName, invoiceNo }) => {
     </FormContainer>
   );
 };
+
+function dataURLtoBlob(dataURL) {
+  const parts = dataURL.split(",");
+  const contentType = parts[0].split(";")[0].split(":")[1];
+  const raw = window.atob(parts[1]);
+  const rawLength = raw.length;
+  const uint8Array = new Uint8Array(rawLength);
+
+  for (let i = 0; i < rawLength; i++) {
+    uint8Array[i] = raw.charCodeAt(i);
+  }
+
+  return new Blob([uint8Array], { type: contentType });
+}
 
 const FormContainer = styled.div`
   margin-top: 20px;
@@ -142,6 +199,26 @@ const ImagePreview = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
+  .thumbnail-container {
+    position: relative;
+    margin: 5px;
+  }
+
+  .thumbnail {
+    max-width: 100px;
+    max-height: 100px;
+    border: 1px solid #ddd;
+  }
+
+  .delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    color: #f00; /* Red color */
+    font-size: 20px;
+  }
 `;
 
 const Thumbnail = styled.img`

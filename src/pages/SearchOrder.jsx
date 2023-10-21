@@ -3,12 +3,13 @@ import IconHome from "../assets/icons/home.png";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import IconWithText from "../components/IconWithTExt";
+import { useNavigate } from "react-router-dom";
 
 const SearchOrder = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const navigate = useNavigate();
 
   const handleSearch = async () => {
     if (!searchTerm) {
@@ -18,13 +19,16 @@ const SearchOrder = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/work-orders?headstoneName=${searchTerm}`, {
-        method: "GET",
-        headers: {
-          "ngrok-skip-browser-warning": "69420",
-        },
-      });
-      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/work-orders?headstoneName=${searchTerm}`,
+        {
+          method: "GET",
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
+        }
+      );
+
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data);
@@ -38,12 +42,77 @@ const SearchOrder = () => {
     }
   };
 
-  const openImagePopup = (image) => {
-    setSelectedImage(image);
+  const viewInvoice = async (invoiceNo) => {
+    // Make a GET API call using invoiceNo
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/invoice?invoiceNo=${invoiceNo}`,
+        {
+          method: "GET",
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Handle the response data as needed
+        const invoiceData = await response.json();
+        // Pass the data to the new route using route state
+        navigate("/invoice-form", { state: invoiceData });
+        // console.log("Invoice data:", invoiceData);
+
+        // // Construct the URL for the InvoiceForm component with invoiceData as query parameters
+        // const invoiceFormURL = `${
+        //   window.location.origin
+        // }/invoice-form?data=${JSON.stringify(invoiceData)}`;
+
+        // // Calculate dimensions for a maximized pop-up window
+        // const screenWidth = window.screen.width;
+        // const screenHeight = window.screen.height;
+        // const popupWidth = screenWidth;
+        // const popupHeight = screenHeight;
+
+        // // Open the InvoiceForm component in a new tab with maximized dimensions
+        // window.open(
+        //   invoiceFormURL,
+        //   "_blank",
+        //   `width=${popupWidth},height=${popupHeight},left=0,top=0,resizable=yes,scrollbars=yes`
+        // );
+      } else {
+        // Handle the case when the GET request fails
+        console.error("Failed to fetch invoice data");
+      }
+    } catch (error) {
+      console.error("Error fetching invoice data:", error);
+    }
   };
 
-  const closeImagePopup = () => {
-    setSelectedImage(null);
+  const viewWorkOrder = async (invoiceNo) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/work-order?invoiceNo=${invoiceNo}`,
+        {
+          method: "GET",
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
+        }
+      );
+
+      if (response.ok) {
+        // Handle the response data
+        const workOrderData = await response.json();
+        console.log(workOrderData);
+
+        // Pass the data to the new route using route state
+        navigate("/work-order", { state: workOrderData });
+      } else {
+        console.error("Failed to fetch work order data");
+      }
+    } catch (error) {
+      console.error("Error fetching work order data:", error);
+    }
   };
 
   return (
@@ -69,29 +138,28 @@ const SearchOrder = () => {
         <ResultsContainer>
           <ResultsHeading>Search Results:</ResultsHeading>
           <ResultsGrid>
-            {searchResults.map((result,index) => (
+            {searchResults.map((result, index) => (
               <ResultTile key={result.invoiceNo} even={index % 2 === 0}>
                 <TileHeading>{result.headstoneName}</TileHeading>
                 <TileInfo>Invoice No: {result.invoiceNo}</TileInfo>
-                <ViewOrderButton onClick={() => openImagePopup(result.image)}>
-                  View Order
-                </ViewOrderButton>
+                <ButtonsContainer>
+                  <ViewOrderButton
+                    onClick={() => viewWorkOrder(result.invoiceNo)}
+                  >
+                    View Order
+                  </ViewOrderButton>
+                  <ViewInvoiceButton
+                    onClick={() => viewInvoice(result.invoiceNo)}
+                  >
+                    View Invoice
+                  </ViewInvoiceButton>
+                </ButtonsContainer>
               </ResultTile>
             ))}
           </ResultsGrid>
         </ResultsContainer>
       ) : (
         <NoResultsMessage>No results found</NoResultsMessage>
-      )}
-      {selectedImage && (
-        <ImagePopup>
-          <ImagePopupContent>
-            <CloseButton onClick={closeImagePopup}>Close</CloseButton>
-            <ScrollableImageContainer>
-              <img src={selectedImage} alt="Work Order" />
-            </ScrollableImageContainer>
-          </ImagePopupContent>
-        </ImagePopup>
       )}
     </Container>
   );
@@ -101,6 +169,25 @@ const Container = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+`;
+
+const ButtonsContainer = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const ViewInvoiceButton = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
 `;
 
 const NavBar = styled.nav`

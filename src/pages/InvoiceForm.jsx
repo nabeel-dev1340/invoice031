@@ -17,12 +17,14 @@ import SuccessModal from "../components/SuccessModal";
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { useLocation } from "react-router-dom";
 
 const InvoicehtmlForm = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [successModalIsOpen, setSuccessModalIsOpen] = useState(false);
   const [saveButtonText, setSaveButtonText] = useState("Save");
   const [modalIndex, setModalIndex] = useState(0);
+  const location = useLocation();
 
   const handleOpenModal = (index) => {
     setModalIsOpen(true);
@@ -72,9 +74,16 @@ const InvoicehtmlForm = () => {
   };
 
   const generateInvoiceNumber = () => {
-    const timestamp = new Date().getTime();
-    const random = Math.floor(Math.random() * 10000); // You can adjust the range as needed
-    return `INV-${timestamp}-${random}`;
+    const timestamp = new Date().getTime().toString();
+    let randomDigits = "";
+
+    // Generate 5 random indices within the timestamp length
+    for (let i = 0; i < 5; i++) {
+      const randomIndex = Math.floor(Math.random() * timestamp.length);
+      randomDigits += timestamp.charAt(randomIndex);
+    }
+
+    return `INV-${randomDigits}`;
   };
 
   useEffect(() => {
@@ -103,6 +112,12 @@ const InvoicehtmlForm = () => {
     window.print();
   };
 
+  useEffect(() => {
+    if (location.state) {
+      setFormData(location.state);
+    }
+  }, [location.state]);
+
   // Initialize state to store form data
   const [formData, setFormData] = useState({
     headstoneName: "",
@@ -127,7 +142,7 @@ const InvoicehtmlForm = () => {
     tax: "",
     delivery: "",
     foundation: "",
-    discount: "",
+    discount: 0,
     total: "",
     deposit: "",
     balance: "",
@@ -152,11 +167,10 @@ const InvoicehtmlForm = () => {
     modelQty5: "",
     modelPrice5: "",
   });
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let updatedFormData = { ...formData, [name]: value };
-
+  
     // Fetch and update cemetery data if cemetery is selected
     if (name === "cemetery") {
       const selectedCemeteryData = getCemeteryDataByName(value);
@@ -170,16 +184,16 @@ const InvoicehtmlForm = () => {
         };
       }
     }
-
+  
     // Calculate subtotal when modelQty or modelPrice changes for all 4 models
     for (let i = 1; i <= 5; i++) {
       const qtyName = `modelQty${i}`;
       const priceName = `modelPrice${i}`;
-
+  
       if (name === qtyName || name === priceName) {
         const quantity = parseFloat(updatedFormData[qtyName]);
         const price = parseFloat(updatedFormData[priceName]);
-
+  
         if (!isNaN(quantity) && !isNaN(price)) {
           updatedFormData.subTotal = 0; // Reset subtotal
           for (let j = 1; j <= 5; j++) {
@@ -193,57 +207,49 @@ const InvoicehtmlForm = () => {
         }
       }
     }
-
+  
     // Calculate total based on subtotal, tax, stake/delivery, and foundation
     const subTotal = parseFloat(updatedFormData.subTotal);
     const delivery = parseFloat(updatedFormData.delivery);
     const foundation = parseFloat(updatedFormData.foundation);
     const deposit = parseFloat(updatedFormData.deposit);
-    const discountPercentage = parseFloat(updatedFormData.discount);
-
+    const discountAmount = parseFloat(updatedFormData.discount); // Retrieve the discount amount
+  
     const subTotalIsValid = !isNaN(subTotal);
     const deliveryIsValid = !isNaN(delivery);
     const foundationIsValid = !isNaN(foundation);
     const depositIsValid = !isNaN(deposit);
-
+  
     if (subTotalIsValid && deliveryIsValid && foundationIsValid) {
       // Calculate the total without discount
       const totalBeforeTax = subTotal + delivery + foundation;
       const taxPercentage = 8.25; // Fixed tax percentage
       const tax = (totalBeforeTax * (taxPercentage / 100)).toFixed(2);
       updatedFormData.tax = tax;
-
-      // Apply the discount if a discount percentage is entered
-      if (!isNaN(discountPercentage) && discountPercentage > 0) {
-        const discountAmount = (
-          totalBeforeTax *
-          (discountPercentage / 100)
-        ).toFixed(2);
-        updatedFormData.discountAmount = discountAmount;
+  
+      // Apply the discount amount
+      if (!isNaN(discountAmount) && discountAmount > 0) {
         updatedFormData.total = (
-          totalBeforeTax -
-          discountAmount +
-          parseFloat(tax)
+          totalBeforeTax - discountAmount + parseFloat(tax)
         ).toFixed(2);
       } else {
-        updatedFormData.discountAmount = "";
         updatedFormData.total = (totalBeforeTax + parseFloat(tax)).toFixed(2);
       }
     } else {
       updatedFormData.total = "";
       updatedFormData.tax = "";
-      updatedFormData.discountAmount = "";
     }
-
+  
     // Calculate the balance if a deposit is entered
     if (depositIsValid) {
       updatedFormData.balance = (deposit - updatedFormData.total).toFixed(2);
     } else {
       updatedFormData.balance = "";
     }
-
+  
     setFormData(updatedFormData);
   };
+  
 
   const captureFormSnapshot = async () => {
     setSaveButtonText("Saving..");
@@ -288,8 +294,12 @@ const InvoicehtmlForm = () => {
     // Create a FormData object to send the blob to the backend
     const finalFormData = new FormData();
     finalFormData.append("pdf", pdfBlob, "invoice.pdf");
-    finalFormData.append("headstoneName", formData.headstoneName);
-    finalFormData.append("invoiceNo", formData.invoiceNo);
+    // Append each field of formData to finalFormData
+    for (const key in formData) {
+      if (formData.hasOwnProperty(key)) {
+        finalFormData.append(key, formData[key]);
+      }
+    }
 
     try {
       // Make an API call to save the PDF and additional data on the backend
@@ -353,8 +363,13 @@ const InvoicehtmlForm = () => {
         <div id="invoice-form">
           <BrandingSection />
           <HeadstoneInfoSection>
-            <div className="input-row">
-              <label htmlFor="name">Name on Headstone:</label>
+            <div
+              className="input-row"
+              style={{ width: "80%", margin: "0 auto" }}
+            >
+              <label htmlFor="name" style={{ marginRight: "10px" }}>
+                Name on Headstone:
+              </label>
               <input
                 type="text"
                 id="name"
@@ -366,7 +381,9 @@ const InvoicehtmlForm = () => {
               />
             </div>
             <div className="input-row">
-              <label htmlFor="invoice">Invoice Number:</label>
+              <label htmlFor="invoice" className="flexy">
+                Invoice Number:
+              </label>
               <input
                 type="text"
                 id="invoice"
@@ -374,7 +391,9 @@ const InvoicehtmlForm = () => {
                 value={formData.invoiceNo}
                 readOnly
               />
-              <label htmlFor="date">Date:</label>
+              <label htmlFor="date" className="flexy">
+                Date:
+              </label>
               <input
                 type="date"
                 id="date"
@@ -386,80 +405,112 @@ const InvoicehtmlForm = () => {
           </HeadstoneInfoSection>
           <HorizontalRule />
           <CemetrySection>
-            <div className="input-row">
-              <label htmlFor="cemetery">Cemetery:</label>
-              <select
-                id="cemetery"
-                name="cemetery"
-                value={formData.cemetery}
-                onChange={handleInputChange}
-              >
-                <option value="">Select Cemetery</option>
-                {cemeteryNames.map((cemeteryName) => (
-                  <option key={cemeteryName} value={cemeteryName}>
-                    {cemeteryName}
-                  </option>
-                ))}
-              </select>
-              <label htmlFor="address">Address:</label>
-              <input
-                type="text"
-                id="address"
-                name="cemeteryAddress"
-                value={formData.cemeteryAddress}
-                onChange={handleInputChange}
-                readOnly
-              />
-            </div>
-            <div className="input-row">
-              <label htmlFor="cemeteryContact">Cemetery Contact:</label>
-              <input
-                type="text"
-                id="cemeteryContact"
-                name="cemeteryContact"
-                value={formData.cemeteryContact}
-                onChange={handleInputChange}
-                readOnly
-              />
-              <label htmlFor="phone">Phone:</label>
-              <input
-                type="text"
-                id="phone"
-                name="Cemeteryphone"
-                onChange={handleInputChange}
-                value={formData.Cemeteryphone}
-                readOnly
-              />
-              <label htmlFor="zone">Zone:</label>
-              <input
-                type="text"
-                id="zone"
-                name="zone"
-                value={formData.zone}
-                onChange={handleInputChange}
-                readOnly
-              />
-            </div>
-            <div className="input-row">
-              <label htmlFor="lotOwner">Lot Owner:</label>
-              <input
-                type="text"
-                id="lotOwner"
-                name="lotOwner"
-                value={formData.lotOwner}
-                onChange={handleInputChange}
-                placeholder="Enter Lot"
-              />
-              <label htmlFor="lotNumber">Lot Number:</label>
-              <input
-                type="text"
-                id="lotNumber"
-                name="lotNumber"
-                value={formData.lotNumber}
-                onChange={handleInputChange}
-                placeholder="Enter lot number"
-              />
-            </div>
+            <table>
+              <tbody>
+                <tr className="input-row">
+                  <th>
+                    <label htmlFor="cemetery">Cemetery:</label>
+                  </th>
+                  <td colSpan="3">
+                    <select
+                      id="cemetery"
+                      name="cemetery"
+                      value={formData.cemetery}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select Cemetery</option>
+                      {cemeteryNames.map((cemeteryName) => (
+                        <option key={cemeteryName} value={cemeteryName}>
+                          {cemeteryName}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+                <tr className="input-row">
+                  <th>
+                    <label htmlFor="address">Address:</label>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      id="address"
+                      name="cemeteryAddress"
+                      value={formData.cemeteryAddress}
+                      onChange={handleInputChange}
+                      readOnly
+                    />
+                  </td>
+                  <th>
+                    <label htmlFor="cemeteryContact">Cemetery Contact:</label>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      id="cemeteryContact"
+                      name="cemeteryContact"
+                      value={formData.cemeteryContact}
+                      onChange={handleInputChange}
+                      readOnly
+                    />
+                  </td>
+                  <th>
+                    <label htmlFor="phone">Phone:</label>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      id="phone"
+                      name="Cemeteryphone"
+                      onChange={handleInputChange}
+                      value={formData.Cemeteryphone}
+                      readOnly
+                    />
+                  </td>
+                </tr>
+                <tr className="input-row">
+                  <th>
+                    <label htmlFor="zone">Zone:</label>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      id="zone"
+                      name="zone"
+                      value={formData.zone}
+                      onChange={handleInputChange}
+                      readOnly
+                    />
+                  </td>
+                  <th>
+                    <label htmlFor="lotOwner">Lot Owner:</label>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      id="lotOwner"
+                      name="lotOwner"
+                      value={formData.lotOwner}
+                      onChange={handleInputChange}
+                      placeholder="Enter Lot"
+                    />
+                  </td>
+                  <th>
+                    <label htmlFor="lotNumber">Lot Number:</label>
+                  </th>
+                  <td>
+                    <input
+                      type="text"
+                      id="lotNumber"
+                      name="lotNumber"
+                      value={formData.lotNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter lot number"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </CemetrySection>
           <HorizontalRule />
           <CustomerDetailsSection>
@@ -531,15 +582,6 @@ const InvoicehtmlForm = () => {
                     </option>
                   ))}
                 </select>
-                {formData.modelColor1 && (
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      backgroundColor: colorOptions[formData.modelColor1],
-                    }}
-                  />
-                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
@@ -597,15 +639,6 @@ const InvoicehtmlForm = () => {
                     </option>
                   ))}
                 </select>
-                {formData.modelColor2 && (
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      backgroundColor: colorOptions[formData.modelColor2],
-                    }}
-                  />
-                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
@@ -632,7 +665,10 @@ const InvoicehtmlForm = () => {
             <div className="model-row">
               <div className="model-input model-flex">
                 <label htmlFor="model">Model:</label>
-                <SelectModelButton type="button" onClick={() => handleOpenModal(3)}>
+                <SelectModelButton
+                  type="button"
+                  onClick={() => handleOpenModal(3)}
+                >
                   Select Model
                 </SelectModelButton>
               </div>
@@ -660,15 +696,6 @@ const InvoicehtmlForm = () => {
                     </option>
                   ))}
                 </select>
-                {formData.modelColor3 && (
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      backgroundColor: colorOptions[formData.modelColor3],
-                    }}
-                  />
-                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
@@ -695,7 +722,10 @@ const InvoicehtmlForm = () => {
             <div className="model-row">
               <div className="model-input model-flex">
                 <label htmlFor="model">Model:</label>
-                <SelectModelButton type="button" onClick={() => handleOpenModal(4)}>
+                <SelectModelButton
+                  type="button"
+                  onClick={() => handleOpenModal(4)}
+                >
                   Select Model
                 </SelectModelButton>
               </div>
@@ -723,15 +753,6 @@ const InvoicehtmlForm = () => {
                     </option>
                   ))}
                 </select>
-                {formData.modelColor4 && (
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      backgroundColor: colorOptions[formData.modelColor4],
-                    }}
-                  />
-                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
@@ -782,15 +803,6 @@ const InvoicehtmlForm = () => {
                     </option>
                   ))}
                 </select>
-                {formData.modelColor5 && (
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      backgroundColor: colorOptions[formData.modelColor5],
-                    }}
-                  />
-                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
@@ -898,7 +910,6 @@ const InvoicehtmlForm = () => {
                       name="discount"
                       value={formData.discount}
                       onChange={handleInputChange}
-                      placeholder="Enter in percentage"
                     />
                   </div>
                   <div className="total model-flex-right">
@@ -1005,14 +1016,14 @@ const HeadstoneInfoSection = styled.section`
     padding: 10px;
   }
 
-  label {
+  .input-row .flexy {
     flex: 1;
-    margin-right: 10px;
     text-align: right;
+    margin-right: 10px;
   }
 
-  input[type="text"],
-  input[type="date"] {
+  .input-row input[type="text"],
+  .input-row input[type="date"] {
     flex: 2;
     padding: 5px;
     border: 1px solid #ccc;
@@ -1041,9 +1052,9 @@ const HeadstoneInfoSection = styled.section`
       flex-wrap: wrap;
     }
 
-    label,
-    input[type="text"],
-    input[type="date"] {
+    .input-row label,
+    .input-row input[type="text"],
+    .input-row input[type="date"] {
       flex: 100%;
     }
 
@@ -1056,55 +1067,50 @@ const HeadstoneInfoSection = styled.section`
 const CemetrySection = styled.div`
   background: #5887fb;
   padding: 10px;
-  .input-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
   }
 
-  .input-row label {
-    flex: 1;
-    margin-right: 10px;
-    text-align: right;
+  label {
+    font-weight: normal;
   }
-
-  .input-row input[type="text"],
-  .input-row select {
-    flex: 2;
+  th,
+  td {
     padding: 5px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    /* background-color: #f2f2f2; */
+  }
+
+  .input-row select,
+  .input-row input[type="text"] {
+    width: 100%;
     border: 1px solid #ccc;
     border-radius: 3px;
+    padding: 5px; /* Add padding for spacing */
   }
 
-  .input-row:nth-child(2) {
-    flex-wrap: wrap;
-  }
-
-  .input-row:nth-child(2) label,
-  .input-row:nth-child(2) input[type="text"] {
-    flex: 1;
-    margin-right: 10px;
-  }
-
-  .input-row:nth-child(3) label,
-  .input-row:nth-child(3) input[type="text"] {
-    flex: 1;
-    margin-right: 10px;
+  .input-row select,
+  .input-row input[type="text"]:focus {
+    border: 1px solid #ccc;
   }
 
   @media screen and (max-width: 480px) {
-    .cemetery-section {
-      max-width: 100%;
-    }
-
     .input-row {
-      flex-wrap: wrap;
+      display: block;
+      margin-bottom: 10px;
     }
 
-    .input-row label,
-    .input-row input[type="text"],
-    .input-row select {
-      flex: 100%;
+    .input-row select,
+    .input-row input[type="text"] {
+      width: 100%;
+      border: 1px solid #ccc;
+      padding: 5px; /* Add padding for spacing */
     }
   }
 `;
@@ -1188,6 +1194,7 @@ const AccountsSection = styled.section`
 
   #details {
     padding: 5px;
+    resize: none;
   }
   .grey-highlight {
     background-color: #b9b3b3;

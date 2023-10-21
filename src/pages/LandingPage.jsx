@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import Option from '../components/Option';
 import { Link } from 'react-router-dom';
-import headingImage from '../assets/images/memorial.png';
 import invoiceImage from "../assets/images/invoice.png";
 import searchImage from "../assets/images/search.png";
 

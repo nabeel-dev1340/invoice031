@@ -14,9 +14,8 @@ import html2canvas from "html2canvas";
 
 const WorkOrder = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
-  const [previewImages, setPreviewImages] = useState([]);
-  const [submissionSuccess, setSubmissionSuccess]=useState(false);
-  const [workOrderSaved,setWorkOrderSaved]=useState(false);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [workOrderSaved, setWorkOrderSaved] = useState(false);
   const [formData, setFormData] = useState({
     headStoneName: "",
     invoiceNo: "",
@@ -28,31 +27,57 @@ const WorkOrder = () => {
     cemeteryAddress: "",
     cemeteryContact: "",
     lotNumber: "",
+    cemeterySubmission: [],
+    engravingSubmission: [],
+    foundationInstall: [],
+    monumentSetting: [],
+    cemeteryApproval: [],
+    finalArt: [],
   });
+
   const location = useLocation();
 
   useEffect(() => {
-    // Check if location.state is available
     if (location.state) {
       setFormData(location.state);
+      // Set uploaded images to cemeterySubmission
+      if (location.state.cemeterySubmission) {
+        const extractedBase64Images = location?.state?.cemeterySubmission?.map(
+          (item) => item?.base64Data
+        );
+        setUploadedImages(extractedBase64Images);
+      }
     }
   }, [location.state]);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    setUploadedImages((prevImages) => [...prevImages, ...files]);
+
+    // Convert uploaded images to base64 strings and store them
+    const base64Images = [];
+
+    const loadImages = async () => {
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          base64Images.push(reader.result);
+          if (base64Images.length === files.length) {
+            // When all images are loaded, update the state
+            setUploadedImages((prevImages) => [...prevImages, ...base64Images]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    loadImages();
   };
 
-  useEffect(() => {
-    const imagePreviews = uploadedImages.map((file) =>
-      URL.createObjectURL(file)
-    );
-    setPreviewImages(imagePreviews);
-
-    return () => {
-      previewImages.forEach(URL.revokeObjectURL);
-    };
-  }, [uploadedImages]);
+  const removeThumbnail = (index) => {
+    const updatedImages = [...uploadedImages];
+    updatedImages.splice(index, 1);
+    setUploadedImages(updatedImages);
+  };
 
   const handlePrint = () => {
     document.title = "Computerized Print";
@@ -67,15 +92,15 @@ const WorkOrder = () => {
       inputElements.forEach((input) => {
         input.style.display = "none";
       });
-  
+
       // Capture the form as an image using html2canvas
       const canvas = await html2canvas(document.getElementById("work-order"));
-  
+
       // Restore the visibility of input elements
       inputElements.forEach((input) => {
         input.style.display = "block";
       });
-  
+
       // Convert the captured canvas to a Blob
       canvas.toBlob(async (blob) => {
         // Create a FormData object to send data to the server
@@ -85,16 +110,25 @@ const WorkOrder = () => {
           blob,
           `${formData.headStoneName}..${formData.invoiceNo}.png`
         );
-  
+        // Append each field of formData to finalFormData
+        for (const key in formData) {
+          if (formData.hasOwnProperty(key)) {
+            formDataToSend.append(key, formData[key]);
+          }
+        }
+
         // Make a POST API call to the /work-order endpoint
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/work-order`, {
-          method: "POST",
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-          body: formDataToSend,
-        });
-  
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/work-order`,
+          {
+            method: "POST",
+            headers: {
+              "ngrok-skip-browser-warning": "69420",
+            },
+            body: formDataToSend,
+          }
+        );
+
         if (response.ok) {
           console.log("Work order submission successful!");
           setWorkOrderSaved(true);
@@ -109,29 +143,31 @@ const WorkOrder = () => {
       // Handle the error, show an error message, or retry the submission
     }
   };
-  
+
   const submitToCemetery = async () => {
     try {
       const formDataToSend = new FormData();
 
-      // Append all form data fields
-      for (const key in formData) {
-        formDataToSend.append(key, formData[key]);
-      }
+      formDataToSend.append("headStoneName", formData.headStoneName);
+      formDataToSend.append("invoiceNo", formData.invoiceNo);
 
-      // Append image files with the correct field name "images"
-      uploadedImages.forEach((image, index) => {
-        formDataToSend.append("images", image); // Use "images" as the field name
+      // Convert base64 strings to Blobs and append them
+      uploadedImages.forEach((base64Image, index) => {
+        const blob = dataURLtoBlob(base64Image);
+        formDataToSend.append("images", blob, `image${index}.png`);
       });
 
       // Make the API call
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/submit-to-cemetery`, {
-        method: "POST",
-        headers:{
-          "ngrok-skip-browser-warning": "69420",
-        },
-        body: formDataToSend,
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/submit-to-cemetery`,
+        {
+          method: "POST",
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
+          body: formDataToSend,
+        }
+      );
 
       if (response.ok) {
         console.log("Submission to Cemetery successful!");
@@ -146,6 +182,18 @@ const WorkOrder = () => {
       // Handle the error, show an error message, or retry the submission
     }
   };
+
+  function dataURLtoBlob(dataURL) {
+    const parts = dataURL.split(",");
+    const contentType = parts[0].split(";")[0].split(":")[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uint8Array = new Uint8Array(rawLength);
+    for (let i = 0; i < rawLength; i++) {
+      uint8Array[i] = raw.charCodeAt(i);
+    }
+    return new Blob([uint8Array], { type: contentType });
+  }
 
   const closeModal = () => {
     setWorkOrderSaved(false);
@@ -202,29 +250,53 @@ const WorkOrder = () => {
               <ImageInput
                 type="file"
                 name="images"
-                accept="image/*"
+                accept="image/*,.plt"
                 multiple
                 onChange={handleImageUpload}
-                required
               />
-
               <ImagePreview>
-                {previewImages.map((image, index) => (
-                  <Thumbnail key={index} src={image} />
-                ))}
+                {uploadedImages &&
+                  uploadedImages.map((image, index) => (
+                    <div key={index} className="thumbnail-container">
+                      <span
+                        className="delete-button"
+                        onClick={() => removeThumbnail(index)}
+                      >
+                        &#x2716;
+                      </span>
+                      <Thumbnail
+                        className="thumbnail"
+                        src={image}
+                        alt="Thumbnail"
+                      />
+                    </div>
+                  ))}
               </ImagePreview>
-              <SubmitButton type="button" onClick={submitToCemetery} disabled={uploadedImages.length<=0 || submissionSuccess}>
-              {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
+              <SubmitButton
+                type="button"
+                onClick={submitToCemetery}
+                disabled={uploadedImages.length <= 0 || submissionSuccess}
+              >
+                {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
               </SubmitButton>
             </DesignForm>
           </CustomerDesign>
           <ArtComponent
             headStoneName={formData.headStoneName}
             invoiceNo={formData.invoiceNo}
+            finalArt={location.state.finalArt && location.state.finalArt}
+            cemeteryApproval={
+              location.state.cemeteryApproval &&
+              location.state.cemeteryApproval[0]?.base64Data
+            }
           />
           <EngravingArt
             headStoneName={formData.headStoneName}
             invoiceNo={formData.invoiceNo}
+            oldEngravingImage={
+              location.state.engravingSubmission &&
+              location.state.engravingSubmission[0]?.base64Data
+            }
           />
           <CemeteryInfo>
             <SectionTitle>Cemetery Information</SectionTitle>
@@ -247,6 +319,14 @@ const WorkOrder = () => {
             <InstallationForm
               headStoneName={formData.headStoneName}
               invoiceNo={formData.invoiceNo}
+              foundationInstall={
+                location.state.foundationInstall &&
+                location.state.foundationInstall
+              }
+              monumentSetting={
+                location.state.monumentSetting &&
+                location.state.monumentSetting[0]?.base64Data
+              }
             />
           </CemeteryInfo>
         </div>
@@ -388,6 +468,26 @@ const ImagePreview = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
+  .thumbnail-container {
+    position: relative;
+    margin: 5px;
+  }
+
+  .thumbnail {
+    max-width: 100px;
+    max-height: 100px;
+    border: 1px solid #ddd;
+  }
+
+  .delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    color: #f00; /* Red color */
+    font-size: 20px;
+  }
 `;
 
 const Thumbnail = styled.img`

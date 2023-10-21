@@ -1,26 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const EngravingArt = ({ headStoneName, invoiceNo }) => {
-  const [engravingImage, setEngravingImage] = useState(null);
+const EngravingArt = ({ headStoneName, invoiceNo, oldEngravingImage }) => {
+  const [engravingImageBase64, setEngravingImageBase64] = useState(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
+
+  // Set oldEngravingImage to engravingImageBase64 if it's not null
+  useEffect(() => {
+    if (oldEngravingImage) {
+      setEngravingImageBase64(oldEngravingImage);
+    }
+  }, [oldEngravingImage]);
 
   const handleEngravingImageUpload = (e) => {
     const file = e.target.files[0];
-    setEngravingImage(file);
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64String = reader.result;
+      setEngravingImageBase64(base64String);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const submitToEngraving = async (e) => {
     e.preventDefault();
 
     try {
+      if (!engravingImageBase64) {
+        console.error("No engraving image has been selected.");
+        return;
+      }
+
+      // Convert the base64 image to a Blob
+      const blob = dataURLtoBlob(engravingImageBase64);
+
       const formDataToSend = new FormData();
       formDataToSend.append("headstoneName", headStoneName);
       formDataToSend.append("invoiceNo", invoiceNo);
-
-      if (engravingImage) {
-        formDataToSend.append("engravingImage", engravingImage);
-      }
+      formDataToSend.append("engravingImage", blob, "engraving.png");
 
       // Make a POST request to your API endpoint
       const response = await fetch(
@@ -35,17 +54,29 @@ const EngravingArt = ({ headStoneName, invoiceNo }) => {
       );
 
       if (response.ok) {
-        // Handle successful response (e.g., show a success message)
+        // Handle a successful response (e.g., show a success message)
         console.log("Engraving submission successful!");
         setSubmissionSuccess(true);
       } else {
-        // Handle error response
+        // Handle an error response
         console.error("Engraving submission failed.");
       }
     } catch (error) {
       console.error("Error submitting engraving:", error);
     }
   };
+
+  function dataURLtoBlob(dataURL) {
+    const parts = dataURL.split(",");
+    const contentType = parts[0].split(";")[0].split(":")[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uint8Array = new Uint8Array(rawLength);
+    for (let i = 0; i < rawLength; i++) {
+      uint8Array[i] = raw.charCodeAt(i);
+    }
+    return new Blob([uint8Array], { type: contentType });
+  }
 
   return (
     <EngravingContainer>
@@ -56,17 +87,16 @@ const EngravingArt = ({ headStoneName, invoiceNo }) => {
           type="file"
           accept="image/*"
           onChange={handleEngravingImageUpload}
-          required
         />
-        {engravingImage && (
+        {engravingImageBase64 && (
           <ImagePreview>
-            <Thumbnail src={URL.createObjectURL(engravingImage)} />
+            <Thumbnail src={engravingImageBase64} alt="engraving image" />
           </ImagePreview>
         )}
         <SubmitButton
           type="button"
           onClick={submitToEngraving}
-          disabled={engravingImage === null || submissionSuccess}
+          disabled={engravingImageBase64 === null || submissionSuccess}
         >
           {submissionSuccess ? "Submitted" : "Submit to Install"}
         </SubmitButton>
@@ -91,7 +121,7 @@ const EngravingContainer = styled.div`
   }
 `;
 
-const EngravingForm = styled.form`
+const EngravingForm = styled.div`
   margin-top: 20px;
 `;
 

@@ -1,44 +1,60 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const ArtComponent = ({ headStoneName, invoiceNo }) => {
-  const [finalArtImages, setFinalArtImages] = useState([]);
-  const [finalArtPreviews, setFinalArtPreviews] = useState([]);
-  const [cemeteryApprovalImagePreview, setCemeteryApprovalImagePreview] =
+const ArtComponent = ({
+  headStoneName,
+  invoiceNo,
+  finalArt,
+  cemeteryApproval,
+}) => {
+  const [finalArtImagesBase64, setFinalArtImagesBase64] = useState([]);
+  const [cemeteryApprovalImageBase64, setCemeteryApprovalImageBase64] =
     useState(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
-  const [cemeteryApprovalImage, setCemeteryApprovalImage] = useState(null);
+
+  useEffect(() => {
+    if (finalArt) {
+      const extractedBase64Images = finalArt.map((item) => item?.base64Data);
+      setFinalArtImagesBase64(extractedBase64Images);
+    }
+    if (cemeteryApproval) {
+      setCemeteryApprovalImageBase64(cemeteryApproval);
+    }
+  }, [finalArt, cemeteryApproval]);
 
   const handleFinalArtUpload = (e) => {
     const files = Array.from(e.target.files);
-    setFinalArtImages((prevImages) => [...prevImages, ...files]);
-  };
 
-  useEffect(() => {
-    const imagePreviews = finalArtImages.map((file) =>
-      URL.createObjectURL(file)
-    );
-    setFinalArtPreviews(imagePreviews);
-    if (cemeteryApprovalImage) {
-      setCemeteryApprovalImagePreview(
-        URL.createObjectURL(cemeteryApprovalImage)
-      );
-    }
+    const loadImages = async () => {
+      for (const file of files) {
+        const reader = new FileReader();
 
-    return () => {
-      imagePreviews.forEach(URL.revokeObjectURL);
-      if (cemeteryApprovalImage) {
-        URL.revokeObjectURL(cemeteryApprovalImagePreview);
+        reader.onload = () => {
+          setFinalArtImagesBase64((prevImages) => [
+            ...prevImages,
+            reader.result,
+          ]);
+        };
+
+        reader.readAsDataURL(file);
       }
     };
-  }, [finalArtImages, cemeteryApprovalImage]);
+
+    loadImages();
+  };
 
   const handleCemeteryApprovalUpload = (e) => {
     const file = e.target.files[0];
-    setCemeteryApprovalImage(file);
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setCemeteryApprovalImageBase64(reader.result);
+    };
+
+    reader.readAsDataURL(file);
   };
 
-  const handleArtSubmission = async (e) => {
+  const submitToArt = async (e) => {
     e.preventDefault();
 
     try {
@@ -47,13 +63,15 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
       formDataToSend.append("invoiceNo", invoiceNo);
 
       // Append final art images
-      finalArtImages.forEach((file, index) => {
-        formDataToSend.append(`finalArtImages`, file);
+      finalArtImagesBase64.forEach((base64Image, index) => {
+        const blob = dataURLtoBlob(base64Image);
+        formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
       });
 
       // Append cemetery approval image
-      if (cemeteryApprovalImage) {
-        formDataToSend.append("finalArtImages", cemeteryApprovalImage);
+      if (cemeteryApprovalImageBase64) {
+        const blob = dataURLtoBlob(cemeteryApprovalImageBase64);
+        formDataToSend.append("finalArtImages", blob, "cemetery-approval.png");
       }
 
       // Make a POST request to your API endpoint
@@ -81,6 +99,24 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
     }
   };
 
+  const removeFinalArtImage = (index) => {
+    const updatedImages = [...finalArtImagesBase64];
+    updatedImages.splice(index, 1);
+    setFinalArtImagesBase64(updatedImages);
+  };
+
+  function dataURLtoBlob(dataURL) {
+    const parts = dataURL.split(",");
+    const contentType = parts[0].split(";")[0].split(":")[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uint8Array = new Uint8Array(rawLength);
+    for (let i = 0; i < rawLength; i++) {
+      uint8Array[i] = raw.charCodeAt(i);
+    }
+    return new Blob([uint8Array], { type: contentType });
+  }
+
   return (
     <ArtContainer>
       <h3>Artwork Submission</h3>
@@ -88,35 +124,41 @@ const ArtComponent = ({ headStoneName, invoiceNo }) => {
         <InputLabel>Final Art</InputLabel>
         <ImageInput
           type="file"
-          accept="image/*"
+          accept="image/*,.plt"
           name="finalArtImages"
           multiple
           onChange={handleFinalArtUpload}
-          required
         />
         <ImagePreview>
-          {finalArtPreviews.map((image, index) => (
-            <Thumbnail key={index} src={image} />
+          {finalArtImagesBase64.map((base64Image, index) => (
+            <div key={index} className="thumbnail-container">
+              <span
+                className="delete-button"
+                onClick={() => removeFinalArtImage(index)}
+              >
+                &#x2716;
+              </span>
+              <Thumbnail src={base64Image} />
+            </div>
           ))}
         </ImagePreview>
         <InputLabel>Cemetery Approval</InputLabel>
         <ImageInput
           type="file"
-          accept="image/*"
+          accept="image/*,.plt"
           onChange={handleCemeteryApprovalUpload}
-          required
         />
         <ImagePreview>
-          {cemeteryApprovalImage && (
-            <Thumbnail src={cemeteryApprovalImagePreview} />
+          {cemeteryApprovalImageBase64 && (
+            <Thumbnail src={cemeteryApprovalImageBase64} />
           )}
         </ImagePreview>
         <SubmitButton
           type="button"
-          onClick={handleArtSubmission}
+          onClick={submitToArt}
           disabled={
-            finalArtImages.length <= 0 ||
-            cemeteryApprovalImage === null ||
+            finalArtImagesBase64.length <= 0 ||
+            cemeteryApprovalImageBase64 === null ||
             submissionSuccess
           }
         >
@@ -164,6 +206,26 @@ const ImagePreview = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
+  .thumbnail-container {
+    position: relative;
+    margin: 5px;
+  }
+
+  .thumbnail {
+    max-width: 100px;
+    max-height: 100px;
+    border: 1px solid #ddd;
+  }
+
+  .delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    color: #f00; /* Red color */
+    font-size: 20px;
+  }
 `;
 
 const Thumbnail = styled.img`
