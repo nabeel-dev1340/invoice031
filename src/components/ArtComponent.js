@@ -12,8 +12,9 @@ const ArtComponent = ({
     useState(null);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
+  // useEffect to set image states
   useEffect(() => {
-    if (finalArt) {
+    if (finalArt && finalArt.length > 0) {
       const extractedBase64Images = finalArt.map((item) => item?.base64Data);
       setFinalArtImagesBase64(extractedBase64Images);
     }
