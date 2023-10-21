@@ -284,18 +284,20 @@ const WorkOrder = () => {
           <ArtComponent
             headStoneName={formData.headStoneName}
             invoiceNo={formData.invoiceNo}
-            finalArt={location.state.finalArt && location.state.finalArt}
+            finalArt={location.state?.finalArt || []}
             cemeteryApproval={
-              location.state.cemeteryApproval &&
-              location.state.cemeteryApproval[0]?.base64Data
+              (location.state?.cemeteryApproval &&
+                location.state.cemeteryApproval[0]?.base64Data) ||
+              null
             }
           />
           <EngravingArt
             headStoneName={formData.headStoneName}
             invoiceNo={formData.invoiceNo}
             oldEngravingImage={
-              location.state.engravingSubmission &&
-              location.state.engravingSubmission[0]?.base64Data
+              (location.state?.engravingSubmission &&
+                location.state.engravingSubmission[0]?.base64Data) ||
+              null
             }
           />
           <CemeteryInfo>
@@ -319,13 +321,11 @@ const WorkOrder = () => {
             <InstallationForm
               headStoneName={formData.headStoneName}
               invoiceNo={formData.invoiceNo}
-              foundationInstall={
-                location.state.foundationInstall &&
-                location.state.foundationInstall
-              }
+              foundationInstall={location.state?.foundationInstall || []}
               monumentSetting={
-                location.state.monumentSetting &&
-                location.state.monumentSetting[0]?.base64Data
+                (location.state?.monumentSetting &&
+                  location.state?.monumentSetting[0]?.base64Data) ||
+                null
               }
             />
           </CemeteryInfo>
