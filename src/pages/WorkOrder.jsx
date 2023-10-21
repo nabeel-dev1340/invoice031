@@ -16,6 +16,7 @@ const WorkOrder = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [workOrderSaved, setWorkOrderSaved] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
   const [formData, setFormData] = useState({
     headStoneName: "",
     invoiceNo: "",
@@ -87,6 +88,7 @@ const WorkOrder = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setSavingOrder(true);
       // Hide the input elements before capturing the screenshot
       const inputElements = document.querySelectorAll("input[type='file']");
       inputElements.forEach((input) => {
@@ -137,10 +139,12 @@ const WorkOrder = () => {
           console.error("Work order submission failed.");
           // Handle the error, show an error message, or retry the submission
         }
+        setSavingOrder(false); // Stop the saving process
       }, "image/png");
     } catch (error) {
       console.error("Error while submitting work order:", error);
       // Handle the error, show an error message, or retry the submission
+      setSavingOrder(false); // Stop the saving process
     }
   };
 
@@ -201,136 +205,140 @@ const WorkOrder = () => {
 
   return (
     <Container>
-      <form onSubmit={handleSubmit}>
-        <NavBar className="nav-bar">
-          <StyledLink to="/landing-page">
-            <IconWithText iconSrc={IconHome} text="Home" />
-          </StyledLink>
-          <UtilityContainer>
-            <IconWithText iconSrc={IconSave} type="submit" text="Save" />
-            <IconWithText
-              iconSrc={IconPrint}
-              onClick={handlePrint}
-              text="Print"
+      <NavBar className="nav-bar">
+        <StyledLink to="/landing-page">
+          <IconWithText iconSrc={IconHome} text="Home" />
+        </StyledLink>
+        <UtilityContainer>
+          <IconWithText
+            iconSrc={IconSave}
+            type="submit"
+            text={savingOrder ? "Saving..." : workOrderSaved ? "Saved" : "Save"}
+            onClick={handleSubmit}
+          />
+          <IconWithText
+            iconSrc={IconPrint}
+            type="button"
+            onClick={handlePrint}
+            text="Print"
+          />
+        </UtilityContainer>
+      </NavBar>
+      <div id="work-order">
+        <Header>
+          <HeadstoneName>{formData.headStoneName}</HeadstoneName>
+          <Details>
+            <Detail>
+              <DetailTitle>Invoice No:</DetailTitle>
+              <DetailValue>{formData.invoiceNo}</DetailValue>
+            </Detail>
+            <Detail>
+              <DetailTitle>Date:</DetailTitle>
+              <DetailValue>{formData.date}</DetailValue>
+            </Detail>
+          </Details>
+          <CustomerDetails>
+            <Detail>
+              <DetailTitle>Customer Name:</DetailTitle>
+              <DetailValue>{formData.customerName}</DetailValue>
+            </Detail>
+            <Detail>
+              <DetailTitle>Email:</DetailTitle>
+              <DetailValue>{formData.customerEmail}</DetailValue>
+            </Detail>
+            <Detail>
+              <DetailTitle>Phone Number:</DetailTitle>
+              <DetailValue>{formData.customerPhone}</DetailValue>
+            </Detail>
+          </CustomerDetails>
+        </Header>
+        <CustomerDesign>
+          <SectionTitle>Customer Design Approval</SectionTitle>
+          <DesignForm>
+            <InputLabel>Design Approved by Customer</InputLabel>
+            <ImageInput
+              type="file"
+              name="images"
+              accept="image/*,.plt"
+              multiple
+              onChange={handleImageUpload}
             />
-          </UtilityContainer>
-        </NavBar>
-        <div id="work-order">
-          <Header>
-            <HeadstoneName>{formData.headStoneName}</HeadstoneName>
-            <Details>
-              <Detail>
-                <DetailTitle>Invoice No:</DetailTitle>
-                <DetailValue>{formData.invoiceNo}</DetailValue>
-              </Detail>
-              <Detail>
-                <DetailTitle>Date:</DetailTitle>
-                <DetailValue>{formData.date}</DetailValue>
-              </Detail>
-            </Details>
-            <CustomerDetails>
-              <Detail>
-                <DetailTitle>Customer Name:</DetailTitle>
-                <DetailValue>{formData.customerName}</DetailValue>
-              </Detail>
-              <Detail>
-                <DetailTitle>Email:</DetailTitle>
-                <DetailValue>{formData.customerEmail}</DetailValue>
-              </Detail>
-              <Detail>
-                <DetailTitle>Phone Number:</DetailTitle>
-                <DetailValue>{formData.customerPhone}</DetailValue>
-              </Detail>
-            </CustomerDetails>
-          </Header>
-          <CustomerDesign>
-            <SectionTitle>Customer Design Approval</SectionTitle>
-            <DesignForm>
-              <InputLabel>Design Approved by Customer</InputLabel>
-              <ImageInput
-                type="file"
-                name="images"
-                accept="image/*,.plt"
-                multiple
-                onChange={handleImageUpload}
-              />
-              <ImagePreview>
-                {uploadedImages &&
-                  uploadedImages.map((image, index) => (
-                    <div key={index} className="thumbnail-container">
-                      <span
-                        className="delete-button"
-                        onClick={() => removeThumbnail(index)}
-                      >
-                        &#x2716;
-                      </span>
-                      <Thumbnail
-                        className="thumbnail"
-                        src={image}
-                        alt="Thumbnail"
-                      />
-                    </div>
-                  ))}
-              </ImagePreview>
-              <SubmitButton
-                type="button"
-                onClick={submitToCemetery}
-                disabled={uploadedImages.length <= 0 || submissionSuccess}
-              >
-                {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
-              </SubmitButton>
-            </DesignForm>
-          </CustomerDesign>
-          <ArtComponent
+            <ImagePreview>
+              {uploadedImages &&
+                uploadedImages.map((image, index) => (
+                  <div key={index} className="thumbnail-container">
+                    <span
+                      className="delete-button"
+                      onClick={() => removeThumbnail(index)}
+                    >
+                      &#x2716;
+                    </span>
+                    <Thumbnail
+                      className="thumbnail"
+                      src={image}
+                      alt="Thumbnail"
+                    />
+                  </div>
+                ))}
+            </ImagePreview>
+            <SubmitButton
+              type="button"
+              onClick={submitToCemetery}
+              disabled={uploadedImages.length <= 0 || submissionSuccess}
+            >
+              {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
+            </SubmitButton>
+          </DesignForm>
+        </CustomerDesign>
+        <ArtComponent
+          headStoneName={formData.headStoneName}
+          invoiceNo={formData.invoiceNo}
+          finalArt={location.state?.finalArt || []}
+          cemeteryApproval={
+            (location.state?.cemeteryApproval &&
+              location.state.cemeteryApproval[0]?.base64Data) ||
+            null
+          }
+        />
+        <EngravingArt
+          headStoneName={formData.headStoneName}
+          invoiceNo={formData.invoiceNo}
+          oldEngravingImage={
+            (location.state?.engravingSubmission &&
+              location.state.engravingSubmission[0]?.base64Data) ||
+            null
+          }
+        />
+        <CemeteryInfo>
+          <SectionTitle>Cemetery Information</SectionTitle>
+          <CemeteryDetail>
+            <DetailTitle>Cemetery Name:</DetailTitle>
+            <DetailValue>{formData.cemeteryName}</DetailValue>
+          </CemeteryDetail>
+          <CemeteryDetail>
+            <DetailTitle>Cemetery Address:</DetailTitle>
+            <DetailValue>{formData.cemeteryAddress}</DetailValue>
+          </CemeteryDetail>
+          <CemeteryDetail>
+            <DetailTitle>Cemetery Contact:</DetailTitle>
+            <DetailValue>{formData.cemeteryContact}</DetailValue>
+          </CemeteryDetail>
+          <CemeteryDetail>
+            <DetailTitle>Lot Number:</DetailTitle>
+            <DetailValue>{formData.lotNumber}</DetailValue>
+          </CemeteryDetail>
+          <InstallationForm
             headStoneName={formData.headStoneName}
             invoiceNo={formData.invoiceNo}
-            finalArt={location.state?.finalArt || []}
-            cemeteryApproval={
-              (location.state?.cemeteryApproval &&
-                location.state.cemeteryApproval[0]?.base64Data) ||
+            foundationInstall={location.state?.foundationInstall || []}
+            monumentSetting={
+              (location.state?.monumentSetting &&
+                location.state?.monumentSetting[0]?.base64Data) ||
               null
             }
           />
-          <EngravingArt
-            headStoneName={formData.headStoneName}
-            invoiceNo={formData.invoiceNo}
-            oldEngravingImage={
-              (location.state?.engravingSubmission &&
-                location.state.engravingSubmission[0]?.base64Data) ||
-              null
-            }
-          />
-          <CemeteryInfo>
-            <SectionTitle>Cemetery Information</SectionTitle>
-            <CemeteryDetail>
-              <DetailTitle>Cemetery Name:</DetailTitle>
-              <DetailValue>{formData.cemeteryName}</DetailValue>
-            </CemeteryDetail>
-            <CemeteryDetail>
-              <DetailTitle>Cemetery Address:</DetailTitle>
-              <DetailValue>{formData.cemeteryAddress}</DetailValue>
-            </CemeteryDetail>
-            <CemeteryDetail>
-              <DetailTitle>Cemetery Contact:</DetailTitle>
-              <DetailValue>{formData.cemeteryContact}</DetailValue>
-            </CemeteryDetail>
-            <CemeteryDetail>
-              <DetailTitle>Lot Number:</DetailTitle>
-              <DetailValue>{formData.lotNumber}</DetailValue>
-            </CemeteryDetail>
-            <InstallationForm
-              headStoneName={formData.headStoneName}
-              invoiceNo={formData.invoiceNo}
-              foundationInstall={location.state?.foundationInstall || []}
-              monumentSetting={
-                (location.state?.monumentSetting &&
-                  location.state?.monumentSetting[0]?.base64Data) ||
-                null
-              }
-            />
-          </CemeteryInfo>
-        </div>
-      </form>
+        </CemeteryInfo>
+      </div>
       {workOrderSaved && (
         <SuccessModal>
           <SuccessModalContent>

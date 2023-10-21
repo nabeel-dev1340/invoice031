@@ -107,7 +107,8 @@ const InvoicehtmlForm = () => {
     }));
   }, []);
 
-  const handlePrint = () => {
+  const handlePrint = (e) => {
+    e.preventDefault(); // Prevent the form submission
     document.title = "Computerized Invoice";
     window.print();
   };
