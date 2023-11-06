@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import IconHome from "../assets/icons/home.png";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import IconWithText from "../components/IconWithTExt";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const SearchOrder = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSearch = async () => {
     if (!searchTerm) {
@@ -191,11 +199,13 @@ const ViewInvoiceButton = styled.button`
 `;
 
 const NavBar = styled.nav`
-  background: #747c7c;
+  background: white;
   display: flex;
   align-items: center;
   padding: 15px;
-
+  border:2px solid grey;
+  border-radius: 5px;
+  border-top: none;
   @media (max-width: 768px) {
     justify-content: space-between;
   }

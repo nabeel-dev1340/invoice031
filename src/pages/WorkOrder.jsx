@@ -11,6 +11,8 @@ import ArtComponent from "../components/ArtComponent";
 import EngravingArt from "../components/EngravingArt";
 import InstallationForm from "../components/InstallationForm";
 import html2canvas from "html2canvas";
+import { useNavigate} from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const WorkOrder = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -37,6 +39,14 @@ const WorkOrder = () => {
   });
 
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (location.state) {
@@ -374,11 +384,11 @@ const StyledLink = styled(Link)`
 `;
 
 const NavBar = styled.nav`
-  background: #747c7c;
+  background: white;
   display: flex;
   align-items: center;
   padding: 15px;
-
+  border: 2px solid grey;
   @media (max-width: 768px) {
     justify-content: space-between;
   }

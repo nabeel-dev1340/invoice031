@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../context/AuthContext";
 
 const LoginPage = () => {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // State to store error message
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setIsAuthenticated } = useAuth(); // Access the authentication context
 
   const handleLogin = async () => {
-    // Check if password is not empty
     if (!password) {
       setError("Password cannot be empty");
       return;
@@ -21,16 +22,14 @@ const LoginPage = () => {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "69420",
         },
-        body: JSON.stringify({ password }), // Send the password to the server
+        body: JSON.stringify({ password }),
       });
 
       if (response.ok) {
-        // Authentication successful, you can redirect the user or perform other actions here
         console.log("Authentication successful");
+        setIsAuthenticated(true); // Set the authentication status to true
         navigate("/landing-page");
-    
       } else {
-        // Authentication failed, handle the error
         setError("Authentication failed. Please check your password.");
       }
     } catch (error) {

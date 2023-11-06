@@ -17,7 +17,8 @@ import SuccessModal from "../components/SuccessModal";
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useLocation } from "react-router-dom";
+import { useLocation,useNavigate} from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const InvoicehtmlForm = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -25,6 +26,15 @@ const InvoicehtmlForm = () => {
   const [saveButtonText, setSaveButtonText] = useState("Save");
   const [modalIndex, setModalIndex] = useState(0);
   const location = useLocation();
+
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleOpenModal = (index) => {
     setModalIsOpen(true);
@@ -217,28 +227,28 @@ const InvoicehtmlForm = () => {
     const discountAmount = parseFloat(updatedFormData.discount); // Retrieve the discount amount
   
     const subTotalIsValid = !isNaN(subTotal);
-    const deliveryIsValid = !isNaN(delivery);
-    const foundationIsValid = !isNaN(foundation);
     const depositIsValid = !isNaN(deposit);
   
-    if (subTotalIsValid && deliveryIsValid && foundationIsValid) {
-      // Calculate the total without discount
-      const totalBeforeTax = subTotal + delivery + foundation;
-      const taxPercentage = 8.25; // Fixed tax percentage
-      const tax = (totalBeforeTax * (taxPercentage / 100)).toFixed(2);
-      updatedFormData.tax = tax;
+    // Calculate the total without discount
+    let totalBeforeTax = subTotal;
+    
+    if (!isNaN(delivery)) {
+      totalBeforeTax += delivery;
+    }
   
-      // Apply the discount amount
-      if (!isNaN(discountAmount) && discountAmount > 0) {
-        updatedFormData.total = (
-          totalBeforeTax - discountAmount + parseFloat(tax)
-        ).toFixed(2);
-      } else {
-        updatedFormData.total = (totalBeforeTax + parseFloat(tax)).toFixed(2);
-      }
+    if (!isNaN(foundation)) {
+      totalBeforeTax += foundation;
+    }
+  
+    const taxPercentage = 8.25; // Fixed tax percentage
+    const tax = (totalBeforeTax * (taxPercentage / 100)).toFixed(2);
+    updatedFormData.tax = tax;
+  
+    // Apply the discount amount
+    if (!isNaN(discountAmount) && discountAmount > 0) {
+      updatedFormData.total = (totalBeforeTax - discountAmount + parseFloat(tax)).toFixed(2);
     } else {
-      updatedFormData.total = "";
-      updatedFormData.tax = "";
+      updatedFormData.total = (totalBeforeTax + parseFloat(tax)).toFixed(2);
     }
   
     // Calculate the balance if a deposit is entered
@@ -250,6 +260,7 @@ const InvoicehtmlForm = () => {
   
     setFormData(updatedFormData);
   };
+  
   
 
   const captureFormSnapshot = async () => {
@@ -991,10 +1002,13 @@ const Container = styled.div`
 `;
 
 const NavBar = styled.nav`
-  background: #747c7c;
+  background: white;
   display: flex;
   height: 60px;
   padding: 15px;
+  border:2px solid grey;
+  border-radius: 5px;
+  border-top: none;
   justify-content: space-between;
 `;
 

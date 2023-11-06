@@ -1,12 +1,24 @@
-import React from 'react';
+import React,{useEffect} from 'react';
+import { useNavigate } from "react-router-dom";
 import styled from 'styled-components';
 import Option from '../components/Option';
 import { Link } from 'react-router-dom';
 import invoiceImage from "../assets/images/invoice.png";
 import searchImage from "../assets/images/search.png";
+import { useAuth } from '../context/AuthContext';
 
 
 const LandingPage = () => {
+
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
     return (
       <LandingPageContainer>
         <Branding>
