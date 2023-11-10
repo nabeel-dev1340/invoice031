@@ -269,7 +269,6 @@ const WorkOrder = () => {
             <ImageInput
               type="file"
               name="images"
-              accept="image/*,.plt"
               multiple
               onChange={handleImageUpload}
             />
@@ -286,7 +285,7 @@ const WorkOrder = () => {
                     <Thumbnail
                       className="thumbnail"
                       src={image}
-                      alt="Thumbnail"
+                      alt="Non-Image file"
                     />
                   </div>
                 ))}

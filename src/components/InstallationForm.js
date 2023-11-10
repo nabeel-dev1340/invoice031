@@ -121,7 +121,6 @@ const InstallationForm = ({
       <InputLabel>Foundation Install</InputLabel>
       <ImageInput
         type="file"
-        accept="image/*"
         multiple
         onChange={handleFoundationInstallUpload}
       />
@@ -134,19 +133,15 @@ const InstallationForm = ({
             >
               &#x2716;
             </span>
-            <Thumbnail src={image} />
+            <Thumbnail src={image} alt="Non-image file" />
           </div>
         ))}
       </ImagePreview>
       <InputLabel>Monument Setting</InputLabel>
-      <ImageInput
-        type="file"
-        accept="image/*"
-        onChange={handleMonumentSettingUpload}
-      />
+      <ImageInput type="file" onChange={handleMonumentSettingUpload} />
       <ImagePreview>
         {monumentSettingImageBase64 && (
-          <Thumbnail src={monumentSettingImageBase64} />
+          <Thumbnail src={monumentSettingImageBase64} alt="Non-image file" />
         )}
       </ImagePreview>
       <SubmitButton

@@ -85,12 +85,11 @@ const EngravingArt = ({ headStoneName, invoiceNo, oldEngravingImage }) => {
         <InputLabel>Photo of Engraving</InputLabel>
         <ImageInput
           type="file"
-          accept="image/*"
           onChange={handleEngravingImageUpload}
         />
         {engravingImageBase64 && (
           <ImagePreview>
-            <Thumbnail src={engravingImageBase64} alt="engraving image" />
+            <Thumbnail src={engravingImageBase64} alt="Non-image file" />
           </ImagePreview>
         )}
         <SubmitButton

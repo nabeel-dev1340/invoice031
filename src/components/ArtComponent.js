@@ -125,7 +125,6 @@ const ArtComponent = ({
         <InputLabel>Final Art</InputLabel>
         <ImageInput
           type="file"
-          accept="image/*,.plt"
           name="finalArtImages"
           multiple
           onChange={handleFinalArtUpload}
@@ -139,19 +138,18 @@ const ArtComponent = ({
               >
                 &#x2716;
               </span>
-              <Thumbnail src={base64Image} />
+              <Thumbnail src={base64Image} alt="Non-image file"/>
             </div>
           ))}
         </ImagePreview>
         <InputLabel>Cemetery Approval</InputLabel>
         <ImageInput
           type="file"
-          accept="image/*,.plt"
           onChange={handleCemeteryApprovalUpload}
         />
         <ImagePreview>
           {cemeteryApprovalImageBase64 && (
-            <Thumbnail src={cemeteryApprovalImageBase64} />
+            <Thumbnail src={cemeteryApprovalImageBase64} alt="Non-image file"/>
           )}
         </ImagePreview>
         <SubmitButton
