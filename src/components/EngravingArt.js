@@ -2,46 +2,57 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 const EngravingArt = ({ headStoneName, invoiceNo, oldEngravingImage }) => {
-  const [engravingImageBase64, setEngravingImageBase64] = useState(null);
+  const [engravingImagesBase64, setEngravingImagesBase64] = useState([]);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
-  // Set oldEngravingImage to engravingImageBase64 if it's not null
   useEffect(() => {
-    if (oldEngravingImage) {
-      setEngravingImageBase64(oldEngravingImage);
+    if (oldEngravingImage && oldEngravingImage.length > 0) {
+      const extractedBase64Images = oldEngravingImage.map(
+        (item) => item?.base64Data
+      );
+      setEngravingImagesBase64(extractedBase64Images);
     }
   }, [oldEngravingImage]);
 
   const handleEngravingImageUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
+    const files = Array.from(e.target.files);
 
-    reader.onload = () => {
-      const base64String = reader.result;
-      setEngravingImageBase64(base64String);
+    const loadImages = async () => {
+      for (const file of files) {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          setEngravingImagesBase64((prevImages) => [
+            ...prevImages,
+            reader.result,
+          ]);
+        };
+
+        reader.readAsDataURL(file);
+      }
     };
 
-    reader.readAsDataURL(file);
+    loadImages();
   };
 
   const submitToEngraving = async (e) => {
     e.preventDefault();
 
     try {
-      if (!engravingImageBase64) {
-        console.error("No engraving image has been selected.");
+      if (engravingImagesBase64.length === 0) {
+        console.error("No engraving images have been selected.");
         return;
       }
-
-      // Convert the base64 image to a Blob
-      const blob = dataURLtoBlob(engravingImageBase64);
 
       const formDataToSend = new FormData();
       formDataToSend.append("headstoneName", headStoneName);
       formDataToSend.append("invoiceNo", invoiceNo);
-      formDataToSend.append("engravingImage", blob, "engraving.png");
 
-      // Make a POST request to your API endpoint
+      engravingImagesBase64.forEach((base64Image, index) => {
+        const blob = dataURLtoBlob(base64Image);
+        formDataToSend.append(`engravingImages`, blob, `engraving${index}.png`);
+      });
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/engraving-submission`,
         {
@@ -54,11 +65,9 @@ const EngravingArt = ({ headStoneName, invoiceNo, oldEngravingImage }) => {
       );
 
       if (response.ok) {
-        // Handle a successful response (e.g., show a success message)
         console.log("Engraving submission successful!");
         setSubmissionSuccess(true);
       } else {
-        // Handle an error response
         console.error("Engraving submission failed.");
       }
     } catch (error) {
@@ -78,24 +87,39 @@ const EngravingArt = ({ headStoneName, invoiceNo, oldEngravingImage }) => {
     return new Blob([uint8Array], { type: contentType });
   }
 
+  const removeEngravingImage = (index) => {
+    const updatedImages = [...engravingImagesBase64];
+    updatedImages.splice(index, 1);
+    setEngravingImagesBase64(updatedImages);
+  };
+
   return (
     <EngravingContainer>
       <h3>Engraving Submission</h3>
       <EngravingForm>
-        <InputLabel>Photo of Engraving</InputLabel>
+        <InputLabel>Photos of Engraving</InputLabel>
         <ImageInput
           type="file"
+          multiple
           onChange={handleEngravingImageUpload}
         />
-        {engravingImageBase64 && (
-          <ImagePreview>
-            <Thumbnail src={engravingImageBase64} alt="Non-image file" />
-          </ImagePreview>
-        )}
+        <ImagePreview>
+          {engravingImagesBase64.map((base64Image, index) => (
+            <div key={index} className="thumbnail-container">
+              <span
+                className="delete-button"
+                onClick={() => removeEngravingImage(index)}
+              >
+                &#x2716;
+              </span>
+              <Thumbnail src={base64Image} alt={`Engraving ${index}`} />
+            </div>
+          ))}
+        </ImagePreview>
         <SubmitButton
           type="button"
           onClick={submitToEngraving}
-          disabled={engravingImageBase64 === null || submissionSuccess}
+          disabled={engravingImagesBase64.length === 0 || submissionSuccess}
         >
           {submissionSuccess ? "Submitted" : "Submit to Install"}
         </SubmitButton>
@@ -141,6 +165,26 @@ const ImagePreview = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
+  .thumbnail-container {
+    position: relative;
+    margin: 5px;
+  }
+
+  .thumbnail {
+    max-width: 100px;
+    max-height: 100px;
+    border: 1px solid #ddd;
+  }
+
+  .delete-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    color: #f00; /* Red color */
+    font-size: 20px;
+  }
 `;
 
 const Thumbnail = styled.img`

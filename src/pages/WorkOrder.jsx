@@ -304,18 +304,14 @@ const WorkOrder = () => {
           invoiceNo={formData.invoiceNo}
           finalArt={location.state?.finalArt || []}
           cemeteryApproval={
-            (location.state?.cemeteryApproval &&
-              location.state.cemeteryApproval[0]?.base64Data) ||
-            null
+            location.state?.cemeteryApproval || []
           }
         />
         <EngravingArt
           headStoneName={formData.headStoneName}
           invoiceNo={formData.invoiceNo}
           oldEngravingImage={
-            (location.state?.engravingSubmission &&
-              location.state.engravingSubmission[0]?.base64Data) ||
-            null
+            location.state?.engravingSubmission || []
           }
         />
         <CemeteryInfo>
@@ -341,9 +337,7 @@ const WorkOrder = () => {
             invoiceNo={formData.invoiceNo}
             foundationInstall={location.state?.foundationInstall || []}
             monumentSetting={
-              (location.state?.monumentSetting &&
-                location.state?.monumentSetting[0]?.base64Data) ||
-              null
+              location.state?.monumentSetting || []
             }
           />
         </CemeteryInfo>

@@ -8,8 +8,8 @@ const ArtComponent = ({
   cemeteryApproval,
 }) => {
   const [finalArtImagesBase64, setFinalArtImagesBase64] = useState([]);
-  const [cemeteryApprovalImageBase64, setCemeteryApprovalImageBase64] =
-    useState(null);
+  const [cemeteryApprovalImagesBase64, setCemeteryApprovalImagesBase64] =
+    useState([]);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
   // useEffect to set image states
@@ -18,8 +18,11 @@ const ArtComponent = ({
       const extractedBase64Images = finalArt.map((item) => item?.base64Data);
       setFinalArtImagesBase64(extractedBase64Images);
     }
-    if (cemeteryApproval) {
-      setCemeteryApprovalImageBase64(cemeteryApproval);
+    if (cemeteryApproval && cemeteryApproval.length > 0) {
+      const extractedBase64CemeteryImages = cemeteryApproval.map(
+        (item) => item?.base64Data
+      );
+      setCemeteryApprovalImagesBase64(extractedBase64CemeteryImages);
     }
   }, [finalArt, cemeteryApproval]);
 
@@ -44,17 +47,27 @@ const ArtComponent = ({
     loadImages();
   };
 
+  // Handle multiple cemetery approval uploads
   const handleCemeteryApprovalUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
+    const files = Array.from(e.target.files);
 
-    reader.onload = () => {
-      setCemeteryApprovalImageBase64(reader.result);
+    const loadImages = async () => {
+      for (const file of files) {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          setCemeteryApprovalImagesBase64((prevImages) => [
+            ...prevImages,
+            reader.result,
+          ]);
+        };
+
+        reader.readAsDataURL(file);
+      }
     };
 
-    reader.readAsDataURL(file);
+    loadImages();
   };
-
   const submitToArt = async (e) => {
     e.preventDefault();
 
@@ -62,6 +75,11 @@ const ArtComponent = ({
       const formDataToSend = new FormData();
       formDataToSend.append("headstoneName", headStoneName);
       formDataToSend.append("invoiceNo", invoiceNo);
+      formDataToSend.append("finalArtLength", finalArtImagesBase64.length);
+      formDataToSend.append(
+        "cemeteryArtLength",
+        cemeteryApprovalImagesBase64.length
+      );
 
       // Append final art images
       finalArtImagesBase64.forEach((base64Image, index) => {
@@ -69,11 +87,10 @@ const ArtComponent = ({
         formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
       });
 
-      // Append cemetery approval image
-      if (cemeteryApprovalImageBase64) {
-        const blob = dataURLtoBlob(cemeteryApprovalImageBase64);
-        formDataToSend.append("finalArtImages", blob, "cemetery-approval.png");
-      }
+      cemeteryApprovalImagesBase64.forEach((base64Image, index) => {
+        const blob = dataURLtoBlob(base64Image);
+        formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
+      });
 
       // Make a POST request to your API endpoint
       const response = await fetch(
@@ -104,6 +121,12 @@ const ArtComponent = ({
     const updatedImages = [...finalArtImagesBase64];
     updatedImages.splice(index, 1);
     setFinalArtImagesBase64(updatedImages);
+  };
+
+  const removeCemeteryApprovalImage = (index) => {
+    const updatedImages = [...cemeteryApprovalImagesBase64];
+    updatedImages.splice(index, 1);
+    setCemeteryApprovalImagesBase64(updatedImages);
   };
 
   function dataURLtoBlob(dataURL) {
@@ -138,26 +161,35 @@ const ArtComponent = ({
               >
                 &#x2716;
               </span>
-              <Thumbnail src={base64Image} alt="Non-image file"/>
+              <Thumbnail src={base64Image} alt="Non-image file" />
             </div>
           ))}
         </ImagePreview>
         <InputLabel>Cemetery Approval</InputLabel>
         <ImageInput
           type="file"
+          multiple // Allow multiple file selection
           onChange={handleCemeteryApprovalUpload}
         />
         <ImagePreview>
-          {cemeteryApprovalImageBase64 && (
-            <Thumbnail src={cemeteryApprovalImageBase64} alt="Non-image file"/>
-          )}
+          {cemeteryApprovalImagesBase64.map((base64Image, index) => (
+            <div key={index} className="thumbnail-container">
+              <span
+                className="delete-button"
+                onClick={() => removeCemeteryApprovalImage(index)}
+              >
+                &#x2716;
+              </span>
+              <Thumbnail src={base64Image} alt="Non-image file" />
+            </div>
+          ))}
         </ImagePreview>
         <SubmitButton
           type="button"
           onClick={submitToArt}
           disabled={
             finalArtImagesBase64.length <= 0 ||
-            cemeteryApprovalImageBase64 === null ||
+            cemeteryApprovalImagesBase64.length === 0 ||
             submissionSuccess
           }
         >

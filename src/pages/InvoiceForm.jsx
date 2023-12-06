@@ -17,7 +17,7 @@ import SuccessModal from "../components/SuccessModal";
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useLocation,useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const InvoicehtmlForm = () => {
@@ -25,6 +25,7 @@ const InvoicehtmlForm = () => {
   const [successModalIsOpen, setSuccessModalIsOpen] = useState(false);
   const [saveButtonText, setSaveButtonText] = useState("Save");
   const [modalIndex, setModalIndex] = useState(0);
+  const [oldTotal, setOldTotal] = useState(0);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -126,6 +127,7 @@ const InvoicehtmlForm = () => {
   useEffect(() => {
     if (location.state) {
       setFormData(location.state);
+      setOldTotal(location.state.total);
     }
   }, [location.state]);
 
@@ -181,7 +183,7 @@ const InvoicehtmlForm = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let updatedFormData = { ...formData, [name]: value };
-  
+
     // Fetch and update cemetery data if cemetery is selected
     if (name === "cemetery") {
       const selectedCemeteryData = getCemeteryDataByName(value);
@@ -195,16 +197,16 @@ const InvoicehtmlForm = () => {
         };
       }
     }
-  
+
     // Calculate subtotal when modelQty or modelPrice changes for all 4 models
     for (let i = 1; i <= 5; i++) {
       const qtyName = `modelQty${i}`;
       const priceName = `modelPrice${i}`;
-  
+
       if (name === qtyName || name === priceName) {
         const quantity = parseFloat(updatedFormData[qtyName]);
         const price = parseFloat(updatedFormData[priceName]);
-  
+
         if (!isNaN(quantity) && !isNaN(price)) {
           updatedFormData.subTotal = 0; // Reset subtotal
           for (let j = 1; j <= 5; j++) {
@@ -218,50 +220,53 @@ const InvoicehtmlForm = () => {
         }
       }
     }
-  
+
     // Calculate total based on subtotal, tax, stake/delivery, and foundation
     const subTotal = parseFloat(updatedFormData.subTotal);
     const delivery = parseFloat(updatedFormData.delivery);
     const foundation = parseFloat(updatedFormData.foundation);
     const deposit = parseFloat(updatedFormData.deposit);
+    const balance = parseFloat(updatedFormData.balance);
     const discountAmount = parseFloat(updatedFormData.discount); // Retrieve the discount amount
-  
-    const subTotalIsValid = !isNaN(subTotal);
+
     const depositIsValid = !isNaN(deposit);
-  
+    const balanceIsValid = !isNaN(balance);
+
     // Calculate the total without discount
     let totalBeforeTax = subTotal;
-    
+
     if (!isNaN(delivery)) {
       totalBeforeTax += delivery;
     }
-  
+
     if (!isNaN(foundation)) {
       totalBeforeTax += foundation;
     }
-  
+
     const taxPercentage = 8.25; // Fixed tax percentage
     const tax = (totalBeforeTax * (taxPercentage / 100)).toFixed(2);
     updatedFormData.tax = tax;
-  
+
     // Apply the discount amount
     if (!isNaN(discountAmount) && discountAmount > 0) {
-      updatedFormData.total = (totalBeforeTax - discountAmount + parseFloat(tax)).toFixed(2);
+      updatedFormData.total = (
+        totalBeforeTax -
+        discountAmount +
+        parseFloat(tax)
+      ).toFixed(2);
     } else {
       updatedFormData.total = (totalBeforeTax + parseFloat(tax)).toFixed(2);
     }
-  
+
     // Calculate the balance if a deposit is entered
     if (depositIsValid) {
       updatedFormData.balance = (deposit - updatedFormData.total).toFixed(2);
     } else {
       updatedFormData.balance = "";
     }
-  
+
     setFormData(updatedFormData);
   };
-  
-  
 
   const captureFormSnapshot = async () => {
     setSaveButtonText("Saving..");
@@ -309,7 +314,11 @@ const InvoicehtmlForm = () => {
     // Append each field of formData to finalFormData
     for (const key in formData) {
       if (formData.hasOwnProperty(key)) {
-        finalFormData.append(key, formData[key]);
+        if (key === "deposit") {
+          finalFormData.append(key, "");
+        } else {
+          finalFormData.append(key, formData[key]);
+        }
       }
     }
 
@@ -869,6 +878,16 @@ const InvoicehtmlForm = () => {
                     Headstone World is not responsible for mistakes
                     <br />
                     which appear in signed and approved orders
+                    <br />
+                    <br />
+                    <strong>NOTE: </strong>
+                    <em>
+                      The negative balance displayed reflects an excess
+                      <br />
+                      in billed amounts over the deposited funds.This does not
+                      <br />
+                      indicate a credit or amount owed to you.
+                    </em>
                   </p>
                 </div>
               </div>
@@ -1006,7 +1025,7 @@ const NavBar = styled.nav`
   display: flex;
   height: 60px;
   padding: 15px;
-  border:2px solid grey;
+  border: 2px solid grey;
   border-radius: 5px;
   border-top: none;
   justify-content: space-between;
@@ -1192,7 +1211,7 @@ const AccountsSection = styled.section`
   .details-row {
     display: flex;
     justify-content: space-around;
-    gap: 55px;
+    gap: 28px;
   }
   .left-section {
     display: flex;
@@ -1221,6 +1240,9 @@ const AccountsSection = styled.section`
   }
   .end-note {
     text-align: center;
+  }
+  .right-section {
+    margin-top: 20px;
   }
   .right-section .total-inputs {
     display: flex;

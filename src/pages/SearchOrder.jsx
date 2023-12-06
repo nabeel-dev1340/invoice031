@@ -123,6 +123,12 @@ const SearchOrder = () => {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <Container>
       <NavBar className="nav-bar">
@@ -137,6 +143,7 @@ const SearchOrder = () => {
           placeholder="Enter headstone name or invoice number"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
         <SearchButton onClick={handleSearch} disabled={loading}>
           {loading ? "Searching..." : "Search"}

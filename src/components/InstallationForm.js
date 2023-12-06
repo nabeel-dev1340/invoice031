@@ -9,19 +9,22 @@ const InstallationForm = ({
 }) => {
   const [foundationInstallImagesBase64, setFoundationInstallImagesBase64] =
     useState([]);
-  const [monumentSettingImageBase64, setMonumentSettingImageBase64] =
-    useState(null);
+  const [monumentSettingImagesBase64, setMonumentSettingImagesBase64] =
+    useState([]);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
   useEffect(() => {
-    if (foundationInstall) {
+    if (foundationInstall && foundationInstall.length > 0) {
       const extractedBase64Images = foundationInstall.map(
         (item) => item?.base64Data
       );
       setFoundationInstallImagesBase64(extractedBase64Images);
     }
-    if (monumentSetting) {
-      setMonumentSettingImageBase64(monumentSetting);
+    if (monumentSetting && monumentSetting.length > 0) {
+      const extractedBase64MonumentImages = monumentSetting.map(
+        (item) => item?.base64Data
+      );
+      setMonumentSettingImagesBase64(extractedBase64MonumentImages);
     }
   }, [foundationInstall, monumentSetting]);
 
@@ -46,21 +49,37 @@ const InstallationForm = ({
     loadImages();
   };
 
+  const handleMonumentSettingUpload = (e) => {
+    const files = Array.from(e.target.files);
+
+    const loadImages = async () => {
+      for (const file of files) {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          setMonumentSettingImagesBase64((prevImages) => [
+            ...prevImages,
+            reader.result,
+          ]);
+        };
+
+        reader.readAsDataURL(file);
+      }
+    };
+
+    loadImages();
+  };
+
   const removeFoundationImage = (index) => {
     const updatedImages = [...foundationInstallImagesBase64];
     updatedImages.splice(index, 1);
     setFoundationInstallImagesBase64(updatedImages);
   };
 
-  const handleMonumentSettingUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setMonumentSettingImageBase64(reader.result);
-    };
-
-    reader.readAsDataURL(file);
+  const removeMonumentImage = (index) => {
+    const updatedImages = [...monumentSettingImagesBase64];
+    updatedImages.splice(index, 1);
+    setMonumentSettingImagesBase64(updatedImages);
   };
 
   const submitToFoundation = async (e) => {
@@ -70,6 +89,14 @@ const InstallationForm = ({
       const formDataToSend = new FormData();
       formDataToSend.append("headstoneName", headStoneName);
       formDataToSend.append("invoiceNo", invoiceNo);
+      formDataToSend.append(
+        "foundationImagesLength",
+        foundationInstallImagesBase64.length
+      );
+      formDataToSend.append(
+        "monumentImagesLength",
+        monumentSettingImagesBase64.length
+      );
 
       // Append foundation install images
       foundationInstallImagesBase64.forEach((base64Image, index) => {
@@ -81,15 +108,15 @@ const InstallationForm = ({
         );
       });
 
-      // Append monument setting image
-      if (monumentSettingImageBase64) {
-        const blob = dataURLtoBlob(monumentSettingImageBase64);
+      // Append monument setting images
+      monumentSettingImagesBase64.forEach((base64Image, index) => {
+        const blob = dataURLtoBlob(base64Image);
         formDataToSend.append(
-          "foundationInstallImages",
+          `foundationInstallImages`,
           blob,
-          "monument-setting.png"
+          `image${index}.png`
         );
-      }
+      });
 
       // Make a POST request to your API endpoint
       const response = await fetch(
@@ -121,6 +148,7 @@ const InstallationForm = ({
       <InputLabel>Foundation Install</InputLabel>
       <ImageInput
         type="file"
+        name="foundationInstallImages"
         multiple
         onChange={handleFoundationInstallUpload}
       />
@@ -138,18 +166,33 @@ const InstallationForm = ({
         ))}
       </ImagePreview>
       <InputLabel>Monument Setting</InputLabel>
-      <ImageInput type="file" onChange={handleMonumentSettingUpload} />
+      <ImageInput
+        type="file"
+        name="monumentSettingImages"
+        multiple // Allow multiple monument setting images
+        onChange={handleMonumentSettingUpload}
+      />
       <ImagePreview>
-        {monumentSettingImageBase64 && (
-          <Thumbnail src={monumentSettingImageBase64} alt="Non-image file" />
-        )}
+        {/* Display monument setting images */}
+        {monumentSettingImagesBase64.map((image, index) => (
+          <div key={index} className="thumbnail-container">
+            <span
+              className="delete-button"
+              onClick={() => removeMonumentImage(index)}
+            >
+              &#x2716;
+            </span>
+            <Thumbnail src={image} alt="Non-image file" />
+          </div>
+        ))}
       </ImagePreview>
+
       <SubmitButton
         type="button"
         onClick={submitToFoundation}
         disabled={
-          foundationInstallImagesBase64.length <= 0 ||
-          monumentSettingImageBase64 === null ||
+          foundationInstallImagesBase64.length === 0 ||
+          monumentSettingImagesBase64.length === 0 ||
           submissionSuccess
         }
       >
