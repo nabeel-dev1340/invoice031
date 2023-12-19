@@ -373,6 +373,12 @@ const InvoicehtmlForm = () => {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  };
+
   const saveDeposit = () => {
     // Validate 'deposit' and perform actions like updating state or making API calls
     if (isNaN(parseFloat(formData.deposit))) {
@@ -426,6 +432,7 @@ const InvoicehtmlForm = () => {
                 name="headstoneName"
                 value={formData.headstoneName}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 placeholder="Enter name to be written on Headstone"
                 required
               />
@@ -542,6 +549,7 @@ const InvoicehtmlForm = () => {
                       name="lotOwner"
                       value={formData.lotOwner}
                       onChange={handleInputChange}
+                      onKeyPress={handleKeyPress}
                       placeholder="Enter Lot"
                     />
                   </td>
@@ -555,6 +563,7 @@ const InvoicehtmlForm = () => {
                       name="lotNumber"
                       value={formData.lotNumber}
                       onChange={handleInputChange}
+                      onKeyPress={handleKeyPress}
                       placeholder="Enter lot number"
                     />
                   </td>
@@ -572,6 +581,7 @@ const InvoicehtmlForm = () => {
                 name="customerName"
                 value={formData.customerName}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 placeholder="Enter customer name"
               />
               <label htmlFor="phone">Phone:</label>
@@ -581,6 +591,7 @@ const InvoicehtmlForm = () => {
                 name="customerPhone"
                 value={formData.customerPhone}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 placeholder="Enter customer phone"
               />
             </div>
@@ -592,6 +603,7 @@ const InvoicehtmlForm = () => {
                 name="customerEmail"
                 value={formData.customerEmail}
                 onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
                 placeholder="Enter customer email"
               />
             </div>
@@ -641,6 +653,7 @@ const InvoicehtmlForm = () => {
                   min={1}
                   value={formData.modelQty1}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
                 />
               </div>
@@ -651,6 +664,7 @@ const InvoicehtmlForm = () => {
                   name="modelPrice1"
                   value={formData.modelPrice1}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
                 />
               </div>
@@ -698,6 +712,7 @@ const InvoicehtmlForm = () => {
                   min={1}
                   value={formData.modelQty2}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
                 />
               </div>
@@ -708,6 +723,7 @@ const InvoicehtmlForm = () => {
                   name="modelPrice2"
                   value={formData.modelPrice2}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
                 />
               </div>
@@ -755,6 +771,7 @@ const InvoicehtmlForm = () => {
                   min={1}
                   value={formData.modelQty3}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
                 />
               </div>
@@ -764,6 +781,7 @@ const InvoicehtmlForm = () => {
                   type="text"
                   name="modelPrice3"
                   value={formData.modelPrice3}
+                  onKeyPress={handleKeyPress}
                   onChange={handleInputChange}
                   placeholder="Enter Price"
                 />
@@ -811,6 +829,7 @@ const InvoicehtmlForm = () => {
                   name="modelQty4"
                   min={1}
                   value={formData.modelQty4}
+                  onKeyPress={handleKeyPress}
                   onChange={handleInputChange}
                   placeholder="Enter Quantity"
                 />
@@ -822,6 +841,7 @@ const InvoicehtmlForm = () => {
                   name="modelPrice4"
                   value={formData.modelPrice4}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
                 />
               </div>
@@ -834,6 +854,7 @@ const InvoicehtmlForm = () => {
                   name="model5"
                   value={formData.model5}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter model"
                   style={{ width: "108px" }}
                 />
@@ -862,6 +883,7 @@ const InvoicehtmlForm = () => {
                   min={1}
                   value={formData.modelQty5}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
                 />
               </div>
@@ -872,6 +894,7 @@ const InvoicehtmlForm = () => {
                   name="modelPrice5"
                   value={formData.modelPrice5}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
                 />
               </div>
@@ -950,6 +973,7 @@ const InvoicehtmlForm = () => {
                       name="delivery"
                       value={formData.delivery}
                       onChange={handleInputChange}
+                      onKeyPress={handleKeyPress}
                       placeholder="Enter delivery amount"
                     />
                   </div>
@@ -959,6 +983,7 @@ const InvoicehtmlForm = () => {
                       type="number"
                       name="foundation"
                       value={formData.foundation}
+                      onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                       placeholder="Enter foundation amount"
                     />
@@ -969,6 +994,7 @@ const InvoicehtmlForm = () => {
                       type="number"
                       name="discount"
                       value={formData.discount}
+                      onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                     />
                   </div>
@@ -989,6 +1015,7 @@ const InvoicehtmlForm = () => {
                       name="deposit"
                       value={formData.deposit}
                       onBlur={saveDeposit}
+                      onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                       placeholder="Enter deposit amount"
                     />
