@@ -25,7 +25,7 @@ const InvoicehtmlForm = () => {
   const [successModalIsOpen, setSuccessModalIsOpen] = useState(false);
   const [saveButtonText, setSaveButtonText] = useState("Save");
   const [modalIndex, setModalIndex] = useState(0);
-  const [oldTotal, setOldTotal] = useState(0);
+  const [deposits, setDeposits] = useState([]);
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -124,10 +124,13 @@ const InvoicehtmlForm = () => {
     window.print();
   };
 
+  // get old data
   useEffect(() => {
     if (location.state) {
-      setFormData(location.state);
-      setOldTotal(location.state.total);
+      setFormData(location.state?.data);
+      if (location.state?.deposits) {
+        setDeposits(location.state?.deposits);
+      }
     }
   }, [location.state]);
 
@@ -258,15 +261,28 @@ const InvoicehtmlForm = () => {
       updatedFormData.total = (totalBeforeTax + parseFloat(tax)).toFixed(2);
     }
 
-    // Calculate the balance if a deposit is entered
-    if (depositIsValid) {
-      updatedFormData.balance = (deposit - updatedFormData.total).toFixed(2);
-    } else {
-      updatedFormData.balance = "";
-    }
-
     setFormData(updatedFormData);
   };
+
+  useEffect(() => {
+    const total = parseFloat(formData.total) || 0;
+
+    // Calculate sum of deposit amounts
+    const depositSum = deposits.reduce(
+      (accumulator, currentDeposit) =>
+        accumulator + parseFloat(currentDeposit.depositAmount || 0),
+      0
+    );
+
+    // Compute the balance
+    const balance = total - depositSum;
+
+    // Update the 'balance' field in the form data
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      balance: balance.toFixed(2),
+    }));
+  }, [deposits, formData.total]);
 
   const captureFormSnapshot = async () => {
     setSaveButtonText("Saving..");
@@ -314,11 +330,7 @@ const InvoicehtmlForm = () => {
     // Append each field of formData to finalFormData
     for (const key in formData) {
       if (formData.hasOwnProperty(key)) {
-        if (key === "deposit") {
-          finalFormData.append(key, "");
-        } else {
-          finalFormData.append(key, formData[key]);
-        }
+        finalFormData.append(key, formData[key]);
       }
     }
 
@@ -359,6 +371,23 @@ const InvoicehtmlForm = () => {
     } catch (error) {
       console.error("API Error:", error);
     }
+  };
+
+  const saveDeposit = () => {
+    // Validate 'deposit' and perform actions like updating state or making API calls
+    if (isNaN(parseFloat(formData.deposit))) {
+      // Show an error or handle invalid input
+      return;
+    }
+
+    const depositAmount = parseFloat(formData.deposit);
+    const newDeposit = {
+      depositAmount: depositAmount.toFixed(2),
+      date: new Date().toISOString().split("T")[0],
+    };
+
+    // Perform actions like updating state with the deposit
+    setDeposits((prevDeposits) => [...prevDeposits, newDeposit]);
   };
 
   return (
@@ -959,6 +988,7 @@ const InvoicehtmlForm = () => {
                       type="number"
                       name="deposit"
                       value={formData.deposit}
+                      onBlur={saveDeposit}
                       onChange={handleInputChange}
                       placeholder="Enter deposit amount"
                     />
@@ -972,6 +1002,17 @@ const InvoicehtmlForm = () => {
                       onChange={handleInputChange}
                       readOnly
                     />
+                  </div>
+                  <div className="deposits model-flex-rght">
+                    {deposits.length > 0 &&
+                      deposits.map((dep, index) => (
+                        <div key={index} className="deposit-item">
+                          <p>
+                            <b>Deposit {`${index + 1}: `}</b>
+                            {`$${dep.depositAmount}`} on {dep.date}
+                          </p>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -1254,6 +1295,14 @@ const AccountsSection = styled.section`
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+  }
+
+  .deposits {
+    margin-top: 10px;
+  }
+
+  .deposit-item {
+    margin-bottom: 5px;
   }
 `;
 
