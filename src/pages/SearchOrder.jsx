@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import IconHome from "../assets/icons/home.png";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
@@ -68,25 +68,6 @@ const SearchOrder = () => {
         const invoiceData = await response.json();
         // Pass the data to the new route using route state
         navigate("/invoice-form", { state: invoiceData });
-        // console.log("Invoice data:", invoiceData);
-
-        // // Construct the URL for the InvoiceForm component with invoiceData as query parameters
-        // const invoiceFormURL = `${
-        //   window.location.origin
-        // }/invoice-form?data=${JSON.stringify(invoiceData)}`;
-
-        // // Calculate dimensions for a maximized pop-up window
-        // const screenWidth = window.screen.width;
-        // const screenHeight = window.screen.height;
-        // const popupWidth = screenWidth;
-        // const popupHeight = screenHeight;
-
-        // // Open the InvoiceForm component in a new tab with maximized dimensions
-        // window.open(
-        //   invoiceFormURL,
-        //   "_blank",
-        //   `width=${popupWidth},height=${popupHeight},left=0,top=0,resizable=yes,scrollbars=yes`
-        // );
       } else {
         // Handle the case when the GET request fails
         console.error("Failed to fetch invoice data");
@@ -111,10 +92,12 @@ const SearchOrder = () => {
       if (response.ok) {
         // Handle the response data
         const workOrderData = await response.json();
-        console.log(workOrderData);
-
         // Pass the data to the new route using route state
         navigate("/work-order", { state: workOrderData });
+      } else if (response.status === 404) {
+        // if work order does not exists
+        const stateData = await response.json();
+        navigate("/work-order", { state: stateData.data });
       } else {
         console.error("Failed to fetch work order data");
       }
@@ -124,7 +107,7 @@ const SearchOrder = () => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -210,7 +193,7 @@ const NavBar = styled.nav`
   display: flex;
   align-items: center;
   padding: 15px;
-  border:2px solid grey;
+  border: 2px solid grey;
   border-radius: 5px;
   border-top: none;
   @media (max-width: 768px) {

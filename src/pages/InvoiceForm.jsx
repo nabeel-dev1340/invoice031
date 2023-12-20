@@ -627,6 +627,7 @@ const InvoicehtmlForm = () => {
                     style={{ width: "70px", height: "50px" }}
                     alt="Selected Model"
                   />
+                  <p>{formData.selectModelImage1}</p>
                 </div>
               )}
               <div className="model-color model-flex">
@@ -686,6 +687,7 @@ const InvoicehtmlForm = () => {
                     style={{ width: "70px", height: "50px" }}
                     alt="Selected Model"
                   />
+                  <p>{formData.selectModelImage2}</p>
                 </div>
               )}
               <div className="model-color model-flex">
@@ -745,6 +747,7 @@ const InvoicehtmlForm = () => {
                     style={{ width: "70px", height: "50px" }}
                     alt="Selected Model"
                   />
+                  <p>{formData.selectModelImage3}</p>
                 </div>
               )}
               <div className="model-color model-flex">
@@ -804,6 +807,7 @@ const InvoicehtmlForm = () => {
                     style={{ width: "70px", height: "50px" }}
                     alt="Selected Model"
                   />
+                   <p>{formData.selectModelImage4}</p>
                 </div>
               )}
               <div className="model-color model-flex">
