@@ -85,61 +85,68 @@ const InstallationForm = ({
   const submitToFoundation = async (e) => {
     e.preventDefault();
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("headstoneName", headStoneName);
-      formDataToSend.append("invoiceNo", invoiceNo);
-      formDataToSend.append(
-        "foundationImagesLength",
-        foundationInstallImagesBase64.length
-      );
-      formDataToSend.append(
-        "monumentImagesLength",
-        monumentSettingImagesBase64.length
-      );
-
-      // Append foundation install images
-      foundationInstallImagesBase64.forEach((base64Image, index) => {
-        const blob = dataURLtoBlob(base64Image);
+    if (
+      foundationInstallImagesBase64.length > 0 ||
+      monumentSettingImagesBase64.length > 0
+    ) {
+      try {
+        const formDataToSend = new FormData();
+        formDataToSend.append("headstoneName", headStoneName);
+        formDataToSend.append("invoiceNo", invoiceNo);
         formDataToSend.append(
-          `foundationInstallImages`,
-          blob,
-          `image${index}.png`
+          "foundationImagesLength",
+          foundationInstallImagesBase64.length
         );
-      });
-
-      // Append monument setting images
-      monumentSettingImagesBase64.forEach((base64Image, index) => {
-        const blob = dataURLtoBlob(base64Image);
         formDataToSend.append(
-          `foundationInstallImages`,
-          blob,
-          `image${index}.png`
+          "monumentImagesLength",
+          monumentSettingImagesBase64.length
         );
-      });
 
-      // Make a POST request to your API endpoint
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/foundation-submission`,
-        {
-          method: "POST",
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-          body: formDataToSend,
+        // Append foundation install images
+        foundationInstallImagesBase64.forEach((base64Image, index) => {
+          const blob = dataURLtoBlob(base64Image);
+          formDataToSend.append(
+            `foundationInstallImages`,
+            blob,
+            `image${index}.png`
+          );
+        });
+
+        // Append monument setting images
+        monumentSettingImagesBase64.forEach((base64Image, index) => {
+          const blob = dataURLtoBlob(base64Image);
+          formDataToSend.append(
+            `foundationInstallImages`,
+            blob,
+            `image${index}.png`
+          );
+        });
+
+        // Make a POST request to your API endpoint
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/foundation-submission`,
+          {
+            method: "POST",
+            headers: {
+              "ngrok-skip-browser-warning": "69420",
+            },
+            body: formDataToSend,
+          }
+        );
+
+        if (response.ok) {
+          // Handle successful response (e.g., show a success message)
+          console.log("Foundation/Setting submission successful!");
+          setSubmissionSuccess(true);
+        } else {
+          // Handle error response
+          console.error("Foundation/Setting submission failed.");
         }
-      );
-
-      if (response.ok) {
-        // Handle successful response (e.g., show a success message)
-        console.log("Foundation/Setting submission successful!");
-        setSubmissionSuccess(true);
-      } else {
-        // Handle error response
-        console.error("Foundation/Setting submission failed.");
+      } catch (error) {
+        console.error("Error submitting Foundation/Setting:", error);
       }
-    } catch (error) {
-      console.error("Error submitting Foundation/Setting:", error);
+    } else {
+      console.log("No images uploaded..");
     }
   };
 
@@ -187,15 +194,7 @@ const InstallationForm = ({
         ))}
       </ImagePreview>
 
-      <SubmitButton
-        type="button"
-        onClick={submitToFoundation}
-        disabled={
-          foundationInstallImagesBase64.length === 0 ||
-          monumentSettingImagesBase64.length === 0 ||
-          submissionSuccess
-        }
-      >
+      <SubmitButton type="button" onClick={submitToFoundation}>
         {submissionSuccess ? "Submitted" : "Submit to Upload"}
       </SubmitButton>
     </FormContainer>

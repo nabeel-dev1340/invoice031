@@ -71,49 +71,56 @@ const ArtComponent = ({
   const submitToArt = async (e) => {
     e.preventDefault();
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("headstoneName", headStoneName);
-      formDataToSend.append("invoiceNo", invoiceNo);
-      formDataToSend.append("finalArtLength", finalArtImagesBase64.length);
-      formDataToSend.append(
-        "cemeteryArtLength",
-        cemeteryApprovalImagesBase64.length
-      );
+    if (
+      finalArtImagesBase64.length > 0 ||
+      cemeteryApprovalImagesBase64.length > 0
+    ) {
+      try {
+        const formDataToSend = new FormData();
+        formDataToSend.append("headstoneName", headStoneName);
+        formDataToSend.append("invoiceNo", invoiceNo);
+        formDataToSend.append("finalArtLength", finalArtImagesBase64.length);
+        formDataToSend.append(
+          "cemeteryArtLength",
+          cemeteryApprovalImagesBase64.length
+        );
 
-      // Append final art images
-      finalArtImagesBase64.forEach((base64Image, index) => {
-        const blob = dataURLtoBlob(base64Image);
-        formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
-      });
+        // Append final art images
+        finalArtImagesBase64.forEach((base64Image, index) => {
+          const blob = dataURLtoBlob(base64Image);
+          formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
+        });
 
-      cemeteryApprovalImagesBase64.forEach((base64Image, index) => {
-        const blob = dataURLtoBlob(base64Image);
-        formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
-      });
+        cemeteryApprovalImagesBase64.forEach((base64Image, index) => {
+          const blob = dataURLtoBlob(base64Image);
+          formDataToSend.append(`finalArtImages`, blob, `image${index}.png`);
+        });
 
-      // Make a POST request to your API endpoint
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/art-submission`,
-        {
-          method: "POST",
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-          body: formDataToSend,
+        // Make a POST request to your API endpoint
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/art-submission`,
+          {
+            method: "POST",
+            headers: {
+              "ngrok-skip-browser-warning": "69420",
+            },
+            body: formDataToSend,
+          }
+        );
+
+        if (response.ok) {
+          // Handle successful response (e.g., show a success message)
+          console.log("Art submission successful!");
+          setSubmissionSuccess(true);
+        } else {
+          // Handle error response
+          console.error("Art submission failed.");
         }
-      );
-
-      if (response.ok) {
-        // Handle successful response (e.g., show a success message)
-        console.log("Art submission successful!");
-        setSubmissionSuccess(true);
-      } else {
-        // Handle error response
-        console.error("Art submission failed.");
+      } catch (error) {
+        console.error("Error submitting art:", error);
       }
-    } catch (error) {
-      console.error("Error submitting art:", error);
+    } else {
+      console.log("No images to submit");
     }
   };
 
@@ -184,15 +191,7 @@ const ArtComponent = ({
             </div>
           ))}
         </ImagePreview>
-        <SubmitButton
-          type="button"
-          onClick={submitToArt}
-          disabled={
-            finalArtImagesBase64.length <= 0 ||
-            cemeteryApprovalImagesBase64.length === 0 ||
-            submissionSuccess
-          }
-        >
+        <SubmitButton type="button" onClick={submitToArt}>
           {submissionSuccess ? "Submitted" : "Submit to Engraving"}
         </SubmitButton>
       </ArtForm>
