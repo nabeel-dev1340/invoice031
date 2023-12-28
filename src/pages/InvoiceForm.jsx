@@ -26,6 +26,8 @@ const InvoicehtmlForm = () => {
   const [saveButtonText, setSaveButtonText] = useState("Save");
   const [modalIndex, setModalIndex] = useState(0);
   const [deposits, setDeposits] = useState([]);
+  const [selectedCemetery, setSelectedCemetery] = useState("");
+  const [customCemetery, setCustomCemetery] = useState("");
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -131,6 +133,14 @@ const InvoicehtmlForm = () => {
       if (location.state?.deposits) {
         setDeposits(location.state?.deposits);
       }
+      if (location.state?.data?.customCemetery) {
+        setSelectedCemetery("Other");
+        setCustomCemetery(location.state.data.customCemetery);
+        setFormData((prevData) => ({
+          ...prevData,
+          cemetery: "Other", // Set formData.cemetery to "Other"
+        }));
+      }
     }
   }, [location.state]);
 
@@ -189,16 +199,30 @@ const InvoicehtmlForm = () => {
 
     // Fetch and update cemetery data if cemetery is selected
     if (name === "cemetery") {
-      const selectedCemeteryData = getCemeteryDataByName(value);
-      if (selectedCemeteryData) {
-        updatedFormData = {
-          ...updatedFormData,
-          cemeteryAddress: selectedCemeteryData.ADDRESS,
-          cemeteryContact: selectedCemeteryData.CONTACT_NAME,
-          Cemeteryphone: selectedCemeteryData.PHONE,
-          zone: selectedCemeteryData.Zone,
-        };
+      if (value !== "Other") {
+        const selectedCemeteryData = getCemeteryDataByName(value);
+        setSelectedCemetery(value);
+        if (selectedCemeteryData) {
+          updatedFormData = {
+            ...updatedFormData,
+            cemeteryAddress: selectedCemeteryData.ADDRESS,
+            cemeteryContact: selectedCemeteryData.CONTACT_NAME,
+            Cemeteryphone: selectedCemeteryData.PHONE,
+            zone: selectedCemeteryData.Zone,
+          };
+        }
+      } else {
+        setSelectedCemetery(value);
       }
+    }
+
+    if (name === "customCemetery") {
+      setCustomCemetery(value);
+      // Update formData.cemetery when "Other" is selected
+      updatedFormData = {
+        ...updatedFormData,
+        customCemetery: value, // Update formData.cemetery here
+      };
     }
 
     // Calculate subtotal when modelQty or modelPrice changes for all 4 models
@@ -323,6 +347,11 @@ const InvoicehtmlForm = () => {
 
     // Save the PDF as a blob
     const pdfBlob = pdf.output("blob");
+
+    //delete custom Cemetery
+    if (selectedCemetery !== "Other") {
+      delete formData?.customCemetery;
+    }
 
     // Create a FormData object to send the blob to the backend
     const finalFormData = new FormData();
@@ -481,7 +510,18 @@ const InvoicehtmlForm = () => {
                           {cemeteryName}
                         </option>
                       ))}
+                      <option value="Other">Other</option>
                     </select>
+                    {selectedCemetery === "Other" && (
+                      <input
+                        type="text"
+                        name="customCemetery"
+                        value={customCemetery}
+                        onChange={handleInputChange}
+                        placeholder="Enter Cemetery Name"
+                        onKeyPress={handleKeyPress}
+                      />
+                    )}
                   </td>
                 </tr>
                 <tr className="input-row">
@@ -495,7 +535,7 @@ const InvoicehtmlForm = () => {
                       name="cemeteryAddress"
                       value={formData.cemeteryAddress}
                       onChange={handleInputChange}
-                      readOnly
+                      onKeyPress={handleKeyPress}
                     />
                   </td>
                   <th>
@@ -508,7 +548,7 @@ const InvoicehtmlForm = () => {
                       name="cemeteryContact"
                       value={formData.cemeteryContact}
                       onChange={handleInputChange}
-                      readOnly
+                      onKeyPress={handleKeyPress}
                     />
                   </td>
                   <th>
@@ -521,7 +561,7 @@ const InvoicehtmlForm = () => {
                       name="Cemeteryphone"
                       onChange={handleInputChange}
                       value={formData.Cemeteryphone}
-                      readOnly
+                      onKeyPress={handleKeyPress}
                     />
                   </td>
                 </tr>
@@ -536,7 +576,7 @@ const InvoicehtmlForm = () => {
                       name="zone"
                       value={formData.zone}
                       onChange={handleInputChange}
-                      readOnly
+                      onKeyPress={handleKeyPress}
                     />
                   </td>
                   <th>
@@ -793,23 +833,16 @@ const InvoicehtmlForm = () => {
             <div className="model-row">
               <div className="model-input model-flex">
                 <label htmlFor="model">Model:</label>
-                <SelectModelButton
-                  type="button"
-                  onClick={() => handleOpenModal(4)}
-                >
-                  Select Model
-                </SelectModelButton>
+                <input
+                  type="text"
+                  name="model4"
+                  value={formData.model4}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter model"
+                  style={{ width: "108px" }}
+                />
               </div>
-              {formData.model4 !== "" && (
-                <div className="selected-image">
-                  <img
-                    src={formData.model4}
-                    style={{ width: "70px", height: "50px" }}
-                    alt="Selected Model"
-                  />
-                   <p>{formData.selectModelImage4}</p>
-                </div>
-              )}
               <div className="model-color model-flex">
                 <label htmlFor="model-color">Color:</label>
                 <select
@@ -833,8 +866,8 @@ const InvoicehtmlForm = () => {
                   name="modelQty4"
                   min={1}
                   value={formData.modelQty4}
-                  onKeyPress={handleKeyPress}
                   onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
                 />
               </div>
