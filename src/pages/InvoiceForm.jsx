@@ -395,6 +395,17 @@ const InvoicehtmlForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Update deposit
+      if (!isNaN(parseFloat(formData.deposit))) {
+        const depositAmount = parseFloat(formData.deposit);
+        const newDeposit = {
+          depositAmount: depositAmount.toFixed(2),
+          date: new Date().toISOString().split("T")[0],
+        };
+
+        // Perform actions like updating state with the deposit
+        setDeposits((prevDeposits) => [...prevDeposits, newDeposit]);
+      }
       // Capture the form snapshot as a PDF
       await captureFormSnapshot();
     } catch (error) {
@@ -406,23 +417,6 @@ const InvoicehtmlForm = () => {
     if (e.key === "Enter") {
       e.preventDefault();
     }
-  };
-
-  const saveDeposit = () => {
-    // Validate 'deposit' and perform actions like updating state or making API calls
-    if (isNaN(parseFloat(formData.deposit))) {
-      // Show an error or handle invalid input
-      return;
-    }
-
-    const depositAmount = parseFloat(formData.deposit);
-    const newDeposit = {
-      depositAmount: depositAmount.toFixed(2),
-      date: new Date().toISOString().split("T")[0],
-    };
-
-    // Perform actions like updating state with the deposit
-    setDeposits((prevDeposits) => [...prevDeposits, newDeposit]);
   };
 
   return (
@@ -1051,7 +1045,6 @@ const InvoicehtmlForm = () => {
                       type="number"
                       name="deposit"
                       value={formData.deposit}
-                      onBlur={saveDeposit}
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                       placeholder="Enter deposit amount"
