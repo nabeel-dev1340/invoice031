@@ -309,7 +309,6 @@ const InvoicehtmlForm = () => {
   }, [deposits, formData.total]);
 
   const captureFormSnapshot = async () => {
-    setSaveButtonText("Saving..");
     const pdf = new jsPDF({
       unit: "mm", // Use millimeters as the unit of measurement
       format: "a4", // Set the paper size to A4
@@ -394,6 +393,7 @@ const InvoicehtmlForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaveButtonText("Saving..");
     try {
       // Update deposit
       if (!isNaN(parseFloat(formData.deposit))) {
@@ -407,7 +407,9 @@ const InvoicehtmlForm = () => {
         setDeposits((prevDeposits) => [...prevDeposits, newDeposit]);
       }
       // Capture the form snapshot as a PDF
-      await captureFormSnapshot();
+      setTimeout(async () => {
+        await captureFormSnapshot();
+      }, 1000);
     } catch (error) {
       console.error("API Error:", error);
     }
