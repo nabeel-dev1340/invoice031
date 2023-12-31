@@ -1103,6 +1103,7 @@ const InvoicehtmlForm = () => {
         cemeteryAddress={formData.cemeteryAddress}
         cemeteryContact={formData.cemeteryContact}
         lotNumber={formData.lotNumber}
+        customCemetery={formData?.customCemetery}
       />
     </Container>
   );

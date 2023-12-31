@@ -84,6 +84,7 @@ const SuccessModal = ({
   cemeteryAddress,
   cemeteryContact,
   lotNumber,
+  customCemetery,
 }) => {
   const navigate = useNavigate();
 
@@ -101,6 +102,7 @@ const SuccessModal = ({
         cemeteryAddress,
         cemeteryContact,
         lotNumber,
+        customCemetery,
       },
     });
   };

@@ -51,6 +51,12 @@ const WorkOrder = () => {
   useEffect(() => {
     if (location.state) {
       setFormData(location.state);
+      if(location.state?.cemeteryName==="Other"){
+        setFormData(prevData => ({
+          ...prevData,
+          cemeteryName: location.state?.customCemetery || "",
+        }));
+      }
       // Set uploaded images to cemeterySubmission
       if (location.state.cemeterySubmission) {
         const extractedBase64Images = location?.state?.cemeterySubmission?.map(
