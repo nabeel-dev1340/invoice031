@@ -225,6 +225,21 @@ const InvoicehtmlForm = () => {
       };
     }
 
+    if (name === "deposit") {
+      const total = parseFloat(formData.total) || 0;
+      // Calculate sum of deposit amounts
+      const depositSum = deposits.reduce(
+        (accumulator, currentDeposit) =>
+          accumulator + parseFloat(currentDeposit.depositAmount || 0),
+        0
+      );
+
+      // Compute the balance
+      const balance = total - depositSum - updatedFormData.deposit;
+
+      updatedFormData.balance = balance;
+    }
+
     // Calculate subtotal when modelQty or modelPrice changes for all 4 models
     for (let i = 1; i <= 5; i++) {
       const qtyName = `modelQty${i}`;
