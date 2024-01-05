@@ -448,7 +448,7 @@ const DetailValue = styled.p`
 `;
 
 const CustomerDesign = styled.div`
-  width: 80%;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
   background: #57facb;
@@ -531,7 +531,7 @@ const SubmitButton = styled.button`
 
 const CemeteryInfo = styled.div`
   background: #f5f5f5;
-  width: 80%;
+  width: 100%;
   margin: 20px auto;
   padding: 20px;
   border-radius: 10px;
