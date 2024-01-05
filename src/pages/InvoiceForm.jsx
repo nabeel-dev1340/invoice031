@@ -16,7 +16,7 @@ import colorOptions from "../utils/colorOptions";
 import SuccessModal from "../components/SuccessModal";
 import axios from "axios";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -329,81 +329,98 @@ const InvoicehtmlForm = () => {
       format: "a4", // Set the paper size to A4
     });
 
-    // Capture the form as an image using html2canvas
-    const canvas = await html2canvas(document.getElementById("invoice-form"));
+    // Capture the form as an image using html-to-image
+    const element = document.getElementById("invoice-form");
+    const imageDataUrl = await htmlToImage.toPng(element);
 
-    // Get the width and height of the canvas element
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+    // Create an Image object for the captured image
+    const img = new Image();
+    img.src = imageDataUrl;
 
-    // Calculate the aspect ratio to fit the canvas within the A4 paper size
-    const aspectRatio = canvasWidth / canvasHeight;
+    img.onload = async function () {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
 
-    // Calculate the width and height of the image in the PDF
-    let pdfWidth = 190; // A4 paper width in millimeters
-    let pdfHeight = pdfWidth / aspectRatio;
+      // Get the width and height of the captured image
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
 
-    // Ensure that the image fits within the A4 paper size
-    if (pdfHeight > 277) {
-      pdfHeight = 277; // A4 paper height in millimeters
-      pdfWidth = pdfHeight * aspectRatio;
-    }
+      // Calculate the aspect ratio to fit the canvas within the A4 paper size
+      const aspectRatio = canvasWidth / canvasHeight;
 
-    // Calculate the center position to place the image on the A4 page
-    const xPosition = (210 - pdfWidth) / 2; // A4 paper width is 210mm
-    const yPosition = (297 - pdfHeight) / 2; // A4 paper height is 297mm
+      // Calculate the width and height of the image in the PDF
+      let pdfWidth = 190; // A4 paper width in millimeters
+      let pdfHeight = pdfWidth / aspectRatio;
 
-    // Convert the captured image to a data URL
-    const imageData = canvas.toDataURL("image/png");
-
-    // Add the captured image to the PDF
-    pdf.addImage(imageData, "PNG", xPosition, yPosition, pdfWidth, pdfHeight);
-
-    // Save the PDF as a blob
-    const pdfBlob = pdf.output("blob");
-
-    //delete custom Cemetery
-    if (selectedCemetery !== "Other") {
-      delete formData?.customCemetery;
-    }
-
-    // Create a FormData object to send the blob to the backend
-    const finalFormData = new FormData();
-    finalFormData.append("pdf", pdfBlob, "invoice.pdf");
-    // Append each field of formData to finalFormData
-    for (const key in formData) {
-      if (formData.hasOwnProperty(key)) {
-        finalFormData.append(key, formData[key]);
+      // Ensure that the image fits within the A4 paper size
+      if (pdfHeight > 277) {
+        pdfHeight = 277; // A4 paper height in millimeters
+        pdfWidth = pdfHeight * aspectRatio;
       }
-    }
 
-    try {
-      // Make an API call to save the PDF and additional data on the backend
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/save-invoice`, // Replace with your backend API endpoint
-        finalFormData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "ngrok-skip-browser-warning": "69420",
-          },
-        }
+      // Calculate the center position to place the image on the A4 page
+      const xPosition = (210 - pdfWidth) / 2; // A4 paper width is 210mm
+      const yPosition = (297 - pdfHeight) / 2; // A4 paper height is 297mm
+
+      // Add the captured image to the PDF
+      pdf.addImage(
+        imageDataUrl,
+        "PNG",
+        xPosition,
+        yPosition,
+        pdfWidth,
+        pdfHeight
       );
 
-      if (response.status === 200) {
-        // Success, you can handle it as needed
-        console.log("PDF and data saved successfully");
-        // Show success modal
-        handleSuccessModalOpen();
-        setSaveButtonText("Saved");
-      } else {
-        console.error("Failed to save PDF and data");
+      // Save the PDF as a blob
+      const pdfBlob = pdf.output("blob");
+
+      //delete custom Cemetery
+      if (selectedCemetery !== "Other") {
+        delete formData?.customCemetery;
+      }
+
+      // Create a FormData object to send the blob to the backend
+      const finalFormData = new FormData();
+      finalFormData.append("pdf", pdfBlob, "invoice.pdf");
+      // Append each field of formData to finalFormData
+      for (const key in formData) {
+        if (formData.hasOwnProperty(key)) {
+          finalFormData.append(key, formData[key]);
+        }
+      }
+
+      try {
+        // Make an API call to save the PDF and additional data on the backend
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_URL}/save-invoice`, // Replace with your backend API endpoint
+          finalFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "ngrok-skip-browser-warning": "69420",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          // Success, you can handle it as needed
+          console.log("PDF and data saved successfully");
+          // Show success modal
+          handleSuccessModalOpen();
+          setSaveButtonText("Saved");
+        } else {
+          console.error("Failed to save PDF and data");
+          setSaveButtonText("Save");
+        }
+      } catch (error) {
+        console.error("Error while saving PDF and data:", error);
         setSaveButtonText("Save");
       }
-    } catch (error) {
-      console.error("Error while saving PDF and data:", error);
-      setSaveButtonText("Save");
-    }
+    };
   };
 
   const handleSubmit = async (e) => {
@@ -1022,7 +1039,7 @@ const InvoicehtmlForm = () => {
                       value={formData.delivery}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
-                      placeholder="Enter delivery amount"
+                      placeholder="Enter amount"
                     />
                   </div>
                   <div className="foundation model-flex-right">
@@ -1033,7 +1050,7 @@ const InvoicehtmlForm = () => {
                       value={formData.foundation}
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
-                      placeholder="Enter foundation amount"
+                      placeholder="Enter amount"
                     />
                   </div>
                   <div className="discount model-flex-right">
@@ -1064,7 +1081,7 @@ const InvoicehtmlForm = () => {
                       value={formData.deposit}
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
-                      placeholder="Enter deposit amount"
+                      placeholder="Enter amount"
                     />
                   </div>
                   <div className="balance model-flex-right">
