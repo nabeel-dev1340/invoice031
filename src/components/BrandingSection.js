@@ -7,9 +7,9 @@ const BrandingSection = () => {
     <BrandingContainer>
       <Branding>HEADSTONE WORLD</Branding>
       <BrandingInfo>
-        <p>713-597-8899</p>
+        <p id="phone">713-597-8899</p>
         <p>headstoneworld@yahoo.com</p>
-        <p>15715 N.Frwy Service Rd Houston, TX 77090</p>
+        <p id="address">15715 N.Frwy Service Rd Houston, TX 77090</p>
       </BrandingInfo>
       <HorizontalRule />
     </BrandingContainer>
@@ -23,18 +23,22 @@ const BrandingContainer = styled.section`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding-top: 15px;
   background: #e7e9eb;
+
+  #phone {
+    width: 99px;
+  }
+  #address {
+    width: 340px;
+  }
 `;
 
-const BrandingLogo = styled.img`
-  width: 40px;
-  height: 40px;
+const Branding = styled.h3`
+  width: 200px;
 `;
-
-const Branding = styled.h3``;
 const BrandingInfo = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 25px;
 `;
