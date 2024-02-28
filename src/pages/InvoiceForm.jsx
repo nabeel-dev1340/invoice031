@@ -203,6 +203,7 @@ const InvoicehtmlForm = () => {
     modelQty5: "",
     modelPrice5: "",
   });
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let updatedFormData = { ...formData, [name]: value };
