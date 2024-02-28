@@ -43,7 +43,7 @@ export const ButtonContainer = styled.div`
 `;
 
 export const CloseButton = styled.button`
-  background-color: #ccc;
+  background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -85,6 +85,20 @@ const SuccessModal = ({
   cemeteryContact,
   lotNumber,
   customCemetery,
+  details,
+  model1,
+  selectModelImage1,
+  modelColor1,
+  model2,
+  selectModelImage2,
+  modelColor2,
+  model3,
+  selectModelImage3,
+  modelColor3,
+  model4,
+  modelColor4,
+  model5,
+  modelColor5,
 }) => {
   const navigate = useNavigate();
 
@@ -103,6 +117,20 @@ const SuccessModal = ({
         cemeteryContact,
         lotNumber,
         customCemetery,
+        details,
+        model1,
+        selectModelImage1,
+        modelColor1,
+        model2,
+        selectModelImage2,
+        modelColor2,
+        model3,
+        selectModelImage3,
+        modelColor3,
+        model4,
+        modelColor4,
+        model5,
+        modelColor5,
       },
     });
   };
@@ -118,9 +146,9 @@ const SuccessModal = ({
         <ModalText>Your invoice has been submitted successfully.</ModalText>
         <ButtonContainer>
           <CloseButton onClick={onClose}>Close</CloseButton>
-          <GenerateButton onClick={handleGenerateWorkOrder}>
+          {/* <GenerateButton onClick={handleGenerateWorkOrder}>
             Generate WorkOrder
-          </GenerateButton>
+          </GenerateButton> */}
         </ButtonContainer>
       </StyledSuccessModal>
     </Modal>

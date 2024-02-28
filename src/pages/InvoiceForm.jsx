@@ -28,6 +28,7 @@ const InvoicehtmlForm = () => {
   const [deposits, setDeposits] = useState([]);
   const [selectedCemetery, setSelectedCemetery] = useState("");
   const [customCemetery, setCustomCemetery] = useState("");
+
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -104,6 +105,7 @@ const InvoicehtmlForm = () => {
     setFormData((prevData) => ({
       ...prevData,
       invoiceNo: uniqueInvoiceNumber,
+      username: localStorage.getItem("username"),
     }));
     // Make the "invoiceNo" field read-only
     document.getElementById("invoice").readOnly = true;
@@ -129,6 +131,7 @@ const InvoicehtmlForm = () => {
   // get old data
   useEffect(() => {
     if (location.state) {
+      console.log(location.state);
       setFormData(location.state?.data);
       if (location.state?.deposits) {
         setDeposits(location.state?.deposits);
@@ -149,6 +152,7 @@ const InvoicehtmlForm = () => {
     headstoneName: "",
     invoiceNo: "",
     date: "",
+    username: "",
     cemetery: "",
     cemeteryAddress: "",
     cemeteryContact: "",
@@ -162,6 +166,7 @@ const InvoicehtmlForm = () => {
     model1: "",
     selectModelImage1: "",
     modelColor1: "",
+    customColor1: "",
     modelQty1: "",
     modelPrice1: "",
     subTotal: 0,
@@ -171,25 +176,30 @@ const InvoicehtmlForm = () => {
     discount: 0,
     total: "",
     deposit: "",
+    paymentMethod: "",
     balance: "",
     details: "",
     model2: "",
     selectModelImage2: "",
     modelColor2: "",
+    customColor2: "",
     modelQty2: "",
     modelPrice2: "",
     model3: "",
     selectModelImage3: "",
     modelColor3: "",
+    customColor3: "",
     modelQty3: "",
     modelPrice3: "",
     model4: "",
     selectModelImage4: "",
     modelColor4: "",
+    customColor4: "",
     modelQty4: "",
     modelPrice4: "",
     model5: "",
     modelColor5: "",
+    customColor5: "",
     modelQty5: "",
     modelPrice5: "",
   });
@@ -207,7 +217,7 @@ const InvoicehtmlForm = () => {
             ...updatedFormData,
             cemeteryAddress: selectedCemeteryData.ADDRESS,
             cemeteryContact: selectedCemeteryData.CONTACT_NAME,
-            Cemeteryphone: selectedCemeteryData.PHONE,
+            cemeteryPhone: selectedCemeteryData.PHONE,
             zone: selectedCemeteryData.Zone,
           };
         }
@@ -267,12 +277,7 @@ const InvoicehtmlForm = () => {
     const subTotal = parseFloat(updatedFormData.subTotal);
     const delivery = parseFloat(updatedFormData.delivery);
     const foundation = parseFloat(updatedFormData.foundation);
-    const deposit = parseFloat(updatedFormData.deposit);
-    const balance = parseFloat(updatedFormData.balance);
     const discountAmount = parseFloat(updatedFormData.discount); // Retrieve the discount amount
-
-    const depositIsValid = !isNaN(deposit);
-    const balanceIsValid = !isNaN(balance);
 
     // Calculate the total without discount
     let totalBeforeTax = subTotal;
@@ -409,6 +414,7 @@ const InvoicehtmlForm = () => {
         if (response.status === 200) {
           // Success, you can handle it as needed
           console.log("PDF and data saved successfully");
+          console.log(formData);
           // Show success modal
           handleSuccessModalOpen();
           setSaveButtonText("Saved");
@@ -433,6 +439,7 @@ const InvoicehtmlForm = () => {
         const newDeposit = {
           depositAmount: depositAmount.toFixed(2),
           date: new Date().toISOString().split("T")[0],
+          paymentMethod: formData.paymentMethod,
         };
 
         // Perform actions like updating state with the deposit
@@ -461,11 +468,13 @@ const InvoicehtmlForm = () => {
             <IconWithText iconSrc={IconHome} text="Home" />
           </StyledLink>
           <UtilityContainer>
-            <IconWithText
-              iconSrc={IconSave}
-              type="submit"
-              text={saveButtonText}
-            />
+            {localStorage.getItem("role") !== "viewer" ? (
+              <IconWithText
+                iconSrc={IconSave}
+                type="submit"
+                text={saveButtonText}
+              />
+            ) : null}
             <IconWithText
               iconSrc={IconPrint}
               onClick={handlePrint}
@@ -491,6 +500,7 @@ const InvoicehtmlForm = () => {
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter name to be written on Headstone"
+                readOnly={localStorage.getItem("role") === "viewer"}
                 required
               />
             </div>
@@ -514,6 +524,7 @@ const InvoicehtmlForm = () => {
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
+                readOnly={localStorage.getItem("role") === "viewer"}
               />
             </div>
           </HeadstoneInfoSection>
@@ -531,6 +542,7 @@ const InvoicehtmlForm = () => {
                       name="cemetery"
                       value={formData.cemetery}
                       onChange={handleInputChange}
+                      disabled={localStorage.getItem("role") === "viewer"}
                     >
                       <option value="">Select Cemetery</option>
                       {cemeteryNames.map((cemeteryName) => (
@@ -560,6 +572,7 @@ const InvoicehtmlForm = () => {
                     <input
                       type="text"
                       id="address"
+                      readOnly={localStorage.getItem("role") === "viewer"}
                       name="cemeteryAddress"
                       value={formData.cemeteryAddress}
                       onChange={handleInputChange}
@@ -574,6 +587,7 @@ const InvoicehtmlForm = () => {
                       type="text"
                       id="cemeteryContact"
                       name="cemeteryContact"
+                      readOnly={localStorage.getItem("role") === "viewer"}
                       value={formData.cemeteryContact}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
@@ -588,7 +602,8 @@ const InvoicehtmlForm = () => {
                       id="phone"
                       name="Cemeteryphone"
                       onChange={handleInputChange}
-                      value={formData.Cemeteryphone}
+                      value={formData.cemeteryPhone}
+                      readOnly={localStorage.getItem("role") === "viewer"}
                       onKeyPress={handleKeyPress}
                     />
                   </td>
@@ -603,6 +618,7 @@ const InvoicehtmlForm = () => {
                       id="zone"
                       name="zone"
                       value={formData.zone}
+                      readOnly={localStorage.getItem("role") === "viewer"}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
                     />
@@ -617,6 +633,7 @@ const InvoicehtmlForm = () => {
                       name="lotOwner"
                       value={formData.lotOwner}
                       onChange={handleInputChange}
+                      readOnly={localStorage.getItem("role") === "viewer"}
                       onKeyPress={handleKeyPress}
                       placeholder="Enter Lot"
                     />
@@ -632,6 +649,7 @@ const InvoicehtmlForm = () => {
                       value={formData.lotNumber}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
+                      readOnly={localStorage.getItem("role") === "viewer"}
                       placeholder="Enter lot number"
                     />
                   </td>
@@ -649,6 +667,7 @@ const InvoicehtmlForm = () => {
                 name="customerName"
                 value={formData.customerName}
                 onChange={handleInputChange}
+                readOnly={localStorage.getItem("role") === "viewer"}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter customer name"
               />
@@ -659,6 +678,7 @@ const InvoicehtmlForm = () => {
                 name="customerPhone"
                 value={formData.customerPhone}
                 onChange={handleInputChange}
+                readOnly={localStorage.getItem("role") === "viewer"}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter customer phone"
               />
@@ -670,6 +690,7 @@ const InvoicehtmlForm = () => {
                 id="email"
                 name="customerEmail"
                 value={formData.customerEmail}
+                readOnly={localStorage.getItem("role") === "viewer"}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter customer email"
@@ -684,6 +705,7 @@ const InvoicehtmlForm = () => {
                 <SelectModelButton
                   type="button"
                   onClick={() => handleOpenModal(1)}
+                  disabled={localStorage.getItem("role") === "viewer"}
                 >
                   Select Model
                 </SelectModelButton>
@@ -692,10 +714,12 @@ const InvoicehtmlForm = () => {
                 <div className="selected-image">
                   <img
                     src={formData.model1}
-                    style={{ width: "70px", height: "50px" }}
+                    style={{ width: "100px", height: "70px" }}
                     alt="Selected Model"
                   />
-                  <p>{formData.selectModelImage1}</p>
+                  <p style={{ textAlign: "center" }}>
+                    {formData.selectModelImage1}
+                  </p>
                 </div>
               )}
               <div className="model-color model-flex">
@@ -705,6 +729,7 @@ const InvoicehtmlForm = () => {
                   name="modelColor1"
                   value={formData.modelColor1}
                   onChange={handleInputChange}
+                  disabled={localStorage.getItem("role") === "viewer"}
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -712,18 +737,42 @@ const InvoicehtmlForm = () => {
                       {color}
                     </option>
                   ))}
+                  <option value={"Custom Color"}>{"Custom Color"}</option>
                 </select>
+                {formData.modelColor1 === "Custom Color" && (
+                  <input
+                    type="text"
+                    placeholder="Enter Color"
+                    id="customColor1"
+                    readOnly={localStorage.getItem("role") === "viewer"}
+                    name="customColor1"
+                    value={formData.customColor1}
+                    onChange={(e) => {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        customColor1: e.target.value,
+                      }));
+                    }}
+                    style={{
+                      maxWidth: "100%",
+                      width: "6rem",
+                    }}
+                  />
+                )}
               </div>
+
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
                 <input
                   type="number"
                   name="modelQty1"
                   min={1}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   value={formData.modelQty1}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
+                  style={{ width: "100%", maxWidth: "3.8em" }}
                 />
               </div>
               <div className="model-price model-flex">
@@ -733,6 +782,7 @@ const InvoicehtmlForm = () => {
                   name="modelPrice1"
                   value={formData.modelPrice1}
                   onChange={handleInputChange}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
                 />
@@ -744,6 +794,7 @@ const InvoicehtmlForm = () => {
                 <SelectModelButton
                   type="button"
                   onClick={() => handleOpenModal(2)}
+                  disabled={localStorage.getItem("role") === "viewer"}
                 >
                   Select Model
                 </SelectModelButton>
@@ -752,10 +803,12 @@ const InvoicehtmlForm = () => {
                 <div className="selected-image">
                   <img
                     src={formData.model2}
-                    style={{ width: "70px", height: "50px" }}
+                    style={{ width: "100px", height: "70px" }}
                     alt="Selected Model"
                   />
-                  <p>{formData.selectModelImage2}</p>
+                  <p style={{ textAlign: "center" }}>
+                    {formData.selectModelImage2}
+                  </p>
                 </div>
               )}
               <div className="model-color model-flex">
@@ -763,6 +816,7 @@ const InvoicehtmlForm = () => {
                 <select
                   id="model-color"
                   name="modelColor2"
+                  disabled={localStorage.getItem("role") === "viewer"}
                   value={formData.modelColor2}
                   onChange={handleInputChange}
                 >
@@ -772,18 +826,41 @@ const InvoicehtmlForm = () => {
                       {color}
                     </option>
                   ))}
+                  <option value={"Custom Color"}>{"Custom Color"}</option>
                 </select>
+                {formData.modelColor2 === "Custom Color" && (
+                  <input
+                    type="text"
+                    placeholder="Enter Color"
+                    id="customColor2"
+                    name="customColor2"
+                    readOnly={localStorage.getItem("role") === "viewer"}
+                    value={formData.customColor2}
+                    onChange={(e) => {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        customColor2: e.target.value,
+                      }));
+                    }}
+                    style={{
+                      maxWidth: "100%",
+                      width: "6rem",
+                    }}
+                  />
+                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
                 <input
                   type="number"
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   name="modelQty2"
                   min={1}
                   value={formData.modelQty2}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
+                  style={{ width: "100%", maxWidth: "3.8em" }}
                 />
               </div>
               <div className="model-price model-flex">
@@ -794,6 +871,7 @@ const InvoicehtmlForm = () => {
                   value={formData.modelPrice2}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   placeholder="Enter Price"
                 />
               </div>
@@ -804,6 +882,7 @@ const InvoicehtmlForm = () => {
                 <SelectModelButton
                   type="button"
                   onClick={() => handleOpenModal(3)}
+                  disabled={localStorage.getItem("role") === "viewer"}
                 >
                   Select Model
                 </SelectModelButton>
@@ -812,10 +891,12 @@ const InvoicehtmlForm = () => {
                 <div className="selected-image">
                   <img
                     src={formData.model3}
-                    style={{ width: "70px", height: "50px" }}
+                    style={{ width: "100px", height: "70px" }}
                     alt="Selected Model"
                   />
-                  <p>{formData.selectModelImage3}</p>
+                  <p style={{ textAlign: "center" }}>
+                    {formData.selectModelImage3}
+                  </p>
                 </div>
               )}
               <div className="model-color model-flex">
@@ -823,6 +904,7 @@ const InvoicehtmlForm = () => {
                 <select
                   id="model-color"
                   name="modelColor3"
+                  disabled={localStorage.getItem("role") === "viewer"}
                   value={formData.modelColor3}
                   onChange={handleInputChange}
                 >
@@ -832,18 +914,41 @@ const InvoicehtmlForm = () => {
                       {color}
                     </option>
                   ))}
+                  <option value={"Custom Color"}>{"Custom Color"}</option>
                 </select>
+                {formData.modelColor3 === "Custom Color" && (
+                  <input
+                    type="text"
+                    placeholder="Enter Color"
+                    id="customColor3"
+                    name="customColor3"
+                    readOnly={localStorage.getItem("role") === "viewer"}
+                    value={formData.customColor3}
+                    onChange={(e) => {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        customColor3: e.target.value,
+                      }));
+                    }}
+                    style={{
+                      maxWidth: "100%",
+                      width: "6rem",
+                    }}
+                  />
+                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
                 <input
                   type="number"
                   name="modelQty3"
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   min={1}
                   value={formData.modelQty3}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
+                  style={{ width: "100%", maxWidth: "3.8em" }}
                 />
               </div>
               <div className="model-price model-flex">
@@ -853,6 +958,7 @@ const InvoicehtmlForm = () => {
                   name="modelPrice3"
                   value={formData.modelPrice3}
                   onKeyPress={handleKeyPress}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
                   placeholder="Enter Price"
                 />
@@ -864,6 +970,7 @@ const InvoicehtmlForm = () => {
                 <input
                   type="text"
                   name="model4"
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   value={formData.model4}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
@@ -877,6 +984,7 @@ const InvoicehtmlForm = () => {
                   id="model-color"
                   name="modelColor4"
                   value={formData.modelColor4}
+                  disabled={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
                 >
                   <option value="">Select Color</option>
@@ -885,18 +993,41 @@ const InvoicehtmlForm = () => {
                       {color}
                     </option>
                   ))}
+                  <option value={"Custom Color"}>{"Custom Color"}</option>
                 </select>
+                {formData.modelColor4 === "Custom Color" && (
+                  <input
+                    type="text"
+                    placeholder="Enter Color"
+                    id="customColor4"
+                    name="customColor4"
+                    value={formData.customColor4}
+                    readOnly={localStorage.getItem("role") === "viewer"}
+                    onChange={(e) => {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        customColor4: e.target.value,
+                      }));
+                    }}
+                    style={{
+                      maxWidth: "100%",
+                      width: "6rem",
+                    }}
+                  />
+                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
                 <input
                   type="number"
                   name="modelQty4"
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   min={1}
                   value={formData.modelQty4}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
+                  style={{ width: "100%", maxWidth: "3.8em" }}
                 />
               </div>
               <div className="model-price model-flex">
@@ -904,6 +1035,7 @@ const InvoicehtmlForm = () => {
                 <input
                   type="text"
                   name="modelPrice4"
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   value={formData.modelPrice4}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
@@ -919,6 +1051,7 @@ const InvoicehtmlForm = () => {
                   name="model5"
                   value={formData.model5}
                   onChange={handleInputChange}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter model"
                   style={{ width: "108px" }}
@@ -930,6 +1063,7 @@ const InvoicehtmlForm = () => {
                   id="model-color"
                   name="modelColor5"
                   value={formData.modelColor5}
+                  disabled={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
                 >
                   <option value="">Select Color</option>
@@ -938,7 +1072,28 @@ const InvoicehtmlForm = () => {
                       {color}
                     </option>
                   ))}
+                  <option value={"Custom Color"}>{"Custom Color"}</option>
                 </select>
+                {formData.modelColor5 === "Custom Color" && (
+                  <input
+                    type="text"
+                    placeholder="Enter Color"
+                    id="customColor5"
+                    name="customColor5"
+                    readOnly={localStorage.getItem("role") === "viewer"}
+                    value={formData.customColor5}
+                    onChange={(e) => {
+                      setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        customColor5: e.target.value,
+                      }));
+                    }}
+                    style={{
+                      maxWidth: "100%",
+                      width: "6rem",
+                    }}
+                  />
+                )}
               </div>
               <div className="model-qty model-flex">
                 <label htmlFor="model-qty">Qty:</label>
@@ -946,10 +1101,12 @@ const InvoicehtmlForm = () => {
                   type="number"
                   name="modelQty5"
                   min={1}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   value={formData.modelQty5}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
+                  style={{ width: "100%", maxWidth: "3.8em" }}
                 />
               </div>
               <div className="model-price model-flex">
@@ -958,6 +1115,7 @@ const InvoicehtmlForm = () => {
                   type="text"
                   name="modelPrice5"
                   value={formData.modelPrice5}
+                  readOnly={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
@@ -973,6 +1131,7 @@ const InvoicehtmlForm = () => {
                     name="details"
                     rows="9"
                     cols="60"
+                    readOnly={localStorage.getItem("role") === "viewer"}
                     value={formData.details}
                     onChange={handleInputChange}
                     placeholder="Enter details here"
@@ -1004,7 +1163,12 @@ const InvoicehtmlForm = () => {
                       in billed amounts over the deposited funds.This does not
                       <br />
                       indicate a credit or amount owed to you.
+                      <br />
                     </em>
+                    <strong>
+                      Order left over 30 days incur a monthly storage charge of
+                      $50.
+                    </strong>
                   </p>
                 </div>
               </div>
@@ -1040,6 +1204,7 @@ const InvoicehtmlForm = () => {
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
                       placeholder="Enter amount"
+                      readOnly={localStorage.getItem("role") === "viewer"}
                     />
                   </div>
                   <div className="foundation model-flex-right">
@@ -1051,6 +1216,7 @@ const InvoicehtmlForm = () => {
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                       placeholder="Enter amount"
+                      readOnly={localStorage.getItem("role") === "viewer"}
                     />
                   </div>
                   <div className="discount model-flex-right">
@@ -1061,6 +1227,7 @@ const InvoicehtmlForm = () => {
                       value={formData.discount}
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
+                      readOnly={localStorage.getItem("role") === "viewer"}
                     />
                   </div>
                   <div className="total model-flex-right">
@@ -1082,8 +1249,68 @@ const InvoicehtmlForm = () => {
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                       placeholder="Enter amount"
+                      readOnly={localStorage.getItem("role") === "viewer"}
                     />
                   </div>
+                  <div className="paymentMethod model-flex-right">
+                    <label htmlFor="paymentMethod">Payment Method:</label>
+                    <div
+                      className=""
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: ".8rem",
+                        paddingLeft: ".5rem",
+                      }}
+                    >
+                      <div className="">
+                        <input
+                          type="radio"
+                          id="Credit"
+                          name="paymentMethod"
+                          disabled={localStorage.getItem("role") === "viewer"}
+                          value="Credit"
+                          checked={formData.paymentMethod === "Credit"}
+                          onChange={handleInputChange}
+                        />
+                        <label
+                          style={{ paddingLeft: ".2rem" }}
+                          htmlFor="Credit"
+                        >
+                          Credit
+                        </label>
+                      </div>
+                      <div className="">
+                        <input
+                          type="radio"
+                          id="Check"
+                          name="paymentMethod"
+                          disabled={localStorage.getItem("role") === "viewer"}
+                          value="Check"
+                          checked={formData.paymentMethod === "Check"}
+                          onChange={handleInputChange}
+                        />
+                        <label style={{ paddingLeft: ".2rem" }} htmlFor="Check">
+                          Check
+                        </label>
+                      </div>
+                      <div className="">
+                        <input
+                          type="radio"
+                          id="Cash"
+                          name="paymentMethod"
+                          value="Cash"
+                          disabled={localStorage.getItem("role") === "viewer"}
+                          checked={formData.paymentMethod === "Cash"}
+                          onChange={handleInputChange}
+                        />
+                        <label style={{ paddingLeft: ".2rem" }} htmlFor="Cash">
+                          Cash
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="balance model-flex-right">
                     <label htmlFor="balance">Balance:</label>
                     <input
@@ -1100,7 +1327,7 @@ const InvoicehtmlForm = () => {
                         <div key={index} className="deposit-item">
                           <p>
                             <b>Deposit {`${index + 1}: `}</b>
-                            {`$${dep.depositAmount}`} on {dep.date}
+                            {`$${dep.depositAmount}`} on {dep.date} {`(${dep.paymentMethod})`}
                           </p>
                         </div>
                       ))}
@@ -1131,6 +1358,20 @@ const InvoicehtmlForm = () => {
         cemeteryContact={formData.cemeteryContact}
         lotNumber={formData.lotNumber}
         customCemetery={formData?.customCemetery}
+        details={formData?.details}
+        model1={formData?.model1}
+        selectModelImage1={formData?.selectModelImage1}
+        modelColor1={formData?.modelColor1}
+        model2={formData?.model2}
+        selectModelImage2={formData?.selectModelImage2}
+        modelColor2={formData?.modelColor2}
+        model3={formData?.model3}
+        selectModelImage3={formData?.selectModelImage3}
+        modelColor3={formData?.modelColor3}
+        model4={formData?.model4}
+        modelColor4={formData?.modelColor4}
+        model5={formData?.model5}
+        modelColor5={formData?.modelColor5}
       />
     </Container>
   );

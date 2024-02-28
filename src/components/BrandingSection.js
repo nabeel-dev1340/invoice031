@@ -28,7 +28,7 @@ const BrandingContainer = styled.section`
   background: #e7e9eb;
 
   #phone {
-    width: 99px;
+    width: 110px;
   }
   #address {
     width: 340px;

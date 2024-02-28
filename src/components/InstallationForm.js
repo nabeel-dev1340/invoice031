@@ -1,205 +1,289 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import styled from "styled-components";
 
-const InstallationForm = ({
-  headStoneName,
-  invoiceNo,
-  foundationInstall,
-  monumentSetting,
-}) => {
-  const [foundationInstallImagesBase64, setFoundationInstallImagesBase64] =
-    useState([]);
-  const [monumentSettingImagesBase64, setMonumentSettingImagesBase64] =
-    useState([]);
-  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+const InstallationForm = forwardRef(
+  ({ headStoneName, invoiceNo, foundationInstall, monumentSetting }, ref) => {
+    const [foundationInstallImagesBase64, setFoundationInstallImagesBase64] =
+      useState([]);
+    const [monumentSettingImagesBase64, setMonumentSettingImagesBase64] =
+      useState([]);
+    const [submissionSuccess, setSubmissionSuccess] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
-  useEffect(() => {
-    if (foundationInstall && foundationInstall.length > 0) {
-      const extractedBase64Images = foundationInstall.map(
-        (item) => item?.base64Data
-      );
-      setFoundationInstallImagesBase64(extractedBase64Images);
-    }
-    if (monumentSetting && monumentSetting.length > 0) {
-      const extractedBase64MonumentImages = monumentSetting.map(
-        (item) => item?.base64Data
-      );
-      setMonumentSettingImagesBase64(extractedBase64MonumentImages);
-    }
-  }, [foundationInstall, monumentSetting]);
-
-  const handleFoundationInstallUpload = (e) => {
-    const files = Array.from(e.target.files);
-
-    const loadImages = async () => {
-      for (const file of files) {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-          setFoundationInstallImagesBase64((prevImages) => [
-            ...prevImages,
-            reader.result,
-          ]);
-        };
-
-        reader.readAsDataURL(file);
+    useEffect(() => {
+      if (foundationInstall && foundationInstall.length > 0) {
+        const extractedBase64Images = foundationInstall.map(
+          (item) => item?.base64Data
+        );
+        setFoundationInstallImagesBase64(extractedBase64Images);
       }
-    };
-
-    loadImages();
-  };
-
-  const handleMonumentSettingUpload = (e) => {
-    const files = Array.from(e.target.files);
-
-    const loadImages = async () => {
-      for (const file of files) {
-        const reader = new FileReader();
-
-        reader.onload = () => {
-          setMonumentSettingImagesBase64((prevImages) => [
-            ...prevImages,
-            reader.result,
-          ]);
-        };
-
-        reader.readAsDataURL(file);
+      if (monumentSetting && monumentSetting.length > 0) {
+        const extractedBase64MonumentImages = monumentSetting.map(
+          (item) => item?.base64Data
+        );
+        setMonumentSettingImagesBase64(extractedBase64MonumentImages);
       }
-    };
+    }, [foundationInstall, monumentSetting]);
 
-    loadImages();
-  };
+    const handleFoundationInstallUpload = (e) => {
+      const files = Array.from(e.target.files);
 
-  const removeFoundationImage = (index) => {
-    const updatedImages = [...foundationInstallImagesBase64];
-    updatedImages.splice(index, 1);
-    setFoundationInstallImagesBase64(updatedImages);
-  };
+      const loadImages = async () => {
+        for (const file of files) {
+          const reader = new FileReader();
 
-  const removeMonumentImage = (index) => {
-    const updatedImages = [...monumentSettingImagesBase64];
-    updatedImages.splice(index, 1);
-    setMonumentSettingImagesBase64(updatedImages);
-  };
+          reader.onload = () => {
+            setFoundationInstallImagesBase64((prevImages) => [
+              ...prevImages,
+              reader.result,
+            ]);
+          };
 
-  const submitToFoundation = async (e) => {
-    e.preventDefault();
-
-    if (
-      foundationInstallImagesBase64.length > 0 ||
-      monumentSettingImagesBase64.length > 0
-    ) {
-      try {
-        const formDataToSend = new FormData();
-        formDataToSend.append("headstoneName", headStoneName);
-        formDataToSend.append("invoiceNo", invoiceNo);
-        formDataToSend.append(
-          "foundationImagesLength",
-          foundationInstallImagesBase64.length
-        );
-        formDataToSend.append(
-          "monumentImagesLength",
-          monumentSettingImagesBase64.length
-        );
-
-        // Append foundation install images
-        foundationInstallImagesBase64.forEach((base64Image, index) => {
-          const blob = dataURLtoBlob(base64Image);
-          formDataToSend.append(
-            `foundationInstallImages`,
-            blob,
-            `image${index}.png`
-          );
-        });
-
-        // Append monument setting images
-        monumentSettingImagesBase64.forEach((base64Image, index) => {
-          const blob = dataURLtoBlob(base64Image);
-          formDataToSend.append(
-            `foundationInstallImages`,
-            blob,
-            `image${index}.png`
-          );
-        });
-
-        // Make a POST request to your API endpoint
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/foundation-submission`,
-          {
-            method: "POST",
-            headers: {
-              "ngrok-skip-browser-warning": "69420",
-            },
-            body: formDataToSend,
-          }
-        );
-
-        if (response.ok) {
-          // Handle successful response (e.g., show a success message)
-          console.log("Foundation/Setting submission successful!");
-          setSubmissionSuccess(true);
-        } else {
-          // Handle error response
-          console.error("Foundation/Setting submission failed.");
+          reader.readAsDataURL(file);
         }
-      } catch (error) {
-        console.error("Error submitting Foundation/Setting:", error);
+      };
+
+      loadImages();
+    };
+
+    const handleMonumentSettingUpload = (e) => {
+      const files = Array.from(e.target.files);
+
+      const loadImages = async () => {
+        for (const file of files) {
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            setMonumentSettingImagesBase64((prevImages) => [
+              ...prevImages,
+              reader.result,
+            ]);
+          };
+
+          reader.readAsDataURL(file);
+        }
+      };
+
+      loadImages();
+    };
+
+    const removeFoundationImage = (index) => {
+      const updatedImages = [...foundationInstallImagesBase64];
+      updatedImages.splice(index, 1);
+      setFoundationInstallImagesBase64(updatedImages);
+    };
+
+    const removeMonumentImage = (index) => {
+      const updatedImages = [...monumentSettingImagesBase64];
+      updatedImages.splice(index, 1);
+      setMonumentSettingImagesBase64(updatedImages);
+    };
+
+    useImperativeHandle(ref, () => ({
+      submitToFoundation: async (e) => {
+        // e.preventDefault();
+
+        if (
+          foundationInstallImagesBase64.length > 0 ||
+          monumentSettingImagesBase64.length > 0
+        ) {
+          try {
+            const formDataToSend = new FormData();
+            formDataToSend.append("headstoneName", headStoneName);
+            formDataToSend.append("invoiceNo", invoiceNo);
+            formDataToSend.append(
+              "foundationImagesLength",
+              foundationInstallImagesBase64.length
+            );
+            formDataToSend.append(
+              "monumentImagesLength",
+              monumentSettingImagesBase64.length
+            );
+
+            // Append foundation install images
+            foundationInstallImagesBase64.forEach((base64Image, index) => {
+              const blob = dataURLtoBlob(base64Image);
+              formDataToSend.append(
+                `foundationInstallImages`,
+                blob,
+                `image${index}.png`
+              );
+            });
+
+            // Append monument setting images
+            monumentSettingImagesBase64.forEach((base64Image, index) => {
+              const blob = dataURLtoBlob(base64Image);
+              formDataToSend.append(
+                `foundationInstallImages`,
+                blob,
+                `image${index}.png`
+              );
+            });
+
+            // Make a POST request to your API endpoint
+            const response = await fetch(
+              `${process.env.REACT_APP_API_URL}/foundation-submission`,
+              {
+                method: "POST",
+                headers: {
+                  "ngrok-skip-browser-warning": "69420",
+                },
+                body: formDataToSend,
+              }
+            );
+
+            if (response.ok) {
+              // Handle successful response (e.g., show a success message)
+              console.log("Foundation/Setting submission successful!");
+              setSubmissionSuccess(true);
+            } else {
+              // Handle error response
+              console.error("Foundation/Setting submission failed.");
+            }
+          } catch (error) {
+            console.error("Error submitting Foundation/Setting:", error);
+          }
+        } else {
+          console.log("No images uploaded..");
+        }
+      },
+    }));
+
+    const handleThumbnailClick = (image) => {
+      setSelectedImage(image);
+    };
+
+    const closeModalImg = () => {
+      setSelectedImage(null);
+    };
+    const settings = {
+      dots: true,
+      infinite: false,
+      speed: 500,
+      slidesToShow: calculateSlidesToShow(),
+      slidesToScroll: 1,
+    };
+
+    function calculateSlidesToShow() {
+      const screenWidth = window.innerWidth;
+      if (screenWidth >= 1200) {
+        return Math.min(7, foundationInstallImagesBase64.length);
+      } else if (screenWidth >= 768) {
+        return Math.min(5, foundationInstallImagesBase64.length);
+      } else {
+        return Math.min(3, foundationInstallImagesBase64.length);
       }
-    } else {
-      console.log("No images uploaded..");
     }
-  };
 
-  return (
-    <FormContainer>
-      <InputLabel>Foundation Install</InputLabel>
-      <ImageInput
-        type="file"
-        name="foundationInstallImages"
-        multiple
-        onChange={handleFoundationInstallUpload}
-      />
-      <ImagePreview>
-        {foundationInstallImagesBase64.map((image, index) => (
-          <div key={index} className="thumbnail-container">
-            <span
-              className="delete-button"
-              onClick={() => removeFoundationImage(index)}
-            >
-              &#x2716;
-            </span>
-            <Thumbnail src={image} alt="Non-image file" />
-          </div>
-        ))}
-      </ImagePreview>
-      <InputLabel>Monument Setting</InputLabel>
-      <ImageInput
-        type="file"
-        name="monumentSettingImages"
-        multiple // Allow multiple monument setting images
-        onChange={handleMonumentSettingUpload}
-      />
-      <ImagePreview>
-        {/* Display monument setting images */}
-        {monumentSettingImagesBase64.map((image, index) => (
-          <div key={index} className="thumbnail-container">
-            <span
-              className="delete-button"
-              onClick={() => removeMonumentImage(index)}
-            >
-              &#x2716;
-            </span>
-            <Thumbnail src={image} alt="Non-image file" />
-          </div>
-        ))}
-      </ImagePreview>
+    const settings2 = {
+      dots: true,
+      infinite: false,
+      speed: 500,
+      slidesToShow: calculateSlidesToShow2(),
+      slidesToScroll: 1,
+    };
 
-      <SubmitButton type="button" onClick={submitToFoundation}>
-        {submissionSuccess ? "Submitted" : "Submit to Upload"}
-      </SubmitButton>
-    </FormContainer>
-  );
-};
+    function calculateSlidesToShow2() {
+      const screenWidth = window.innerWidth;
+      if (screenWidth >= 1200) {
+        return Math.min(7, monumentSettingImagesBase64.length);
+      } else if (screenWidth >= 768) {
+        return Math.min(5, monumentSettingImagesBase64.length);
+      } else {
+        return Math.min(3, monumentSettingImagesBase64.length);
+      }
+    }
+
+    return (
+      <FormContainer>
+        <InputLabel>Foundation Install</InputLabel>
+        {localStorage.getItem("role") !== "viewer" ? (
+          <ImageInput
+            type="file"
+            name="foundationInstallImages"
+            multiple
+            onChange={handleFoundationInstallUpload}
+          />
+        ) : null}
+
+        <div style={{ padding: "1rem" }}>
+          <Slider {...settings}>
+            {foundationInstallImagesBase64.map((image, index) => (
+              <div key={index} className="thumbnail-container">
+                {/* {localStorage.getItem("role") !== "viewer" ? (
+              <span
+                className="delete-button"
+                onClick={() => removeFoundationImage(index)}
+              >
+                &#x2716;
+              </span>
+            ) : null} */}
+
+                <Thumbnail
+                  src={image}
+                  alt="Non-image file"
+                  onClick={() => handleThumbnailClick(image)}
+                />
+              </div>
+            ))}
+          </Slider>
+        </div>
+        {selectedImage && (
+          <ModalOverlay onClick={closeModalImg}>
+            <CloseButton onClick={closeModalImg}>X</CloseButton>
+            <EnlargedImage src={selectedImage} alt="Enlarged Thumbnail" />
+          </ModalOverlay>
+        )}
+        <InputLabel>Monument Setting</InputLabel>
+        {localStorage.getItem("role") !== "viewer" ? (
+          <ImageInput
+            type="file"
+            name="monumentSettingImages"
+            multiple // Allow multiple monument setting images
+            onChange={handleMonumentSettingUpload}
+          />
+        ) : null}
+
+        <div style={{ padding: "1rem" }}>
+          <Slider {...settings2}>
+            {/* Display monument setting images */}
+            {monumentSettingImagesBase64.map((image, index) => (
+              <div key={index} className="thumbnail-container">
+                {/* {localStorage.getItem("role") !== "viewer" ? (
+              <span
+                className="delete-button"
+                onClick={() => removeMonumentImage(index)}
+              >
+                &#x2716;
+              </span>
+            ) : null} */}
+
+                <Thumbnail
+                  src={image}
+                  alt="Non-image file"
+                  onClick={() => handleThumbnailClick(image)}
+                />
+              </div>
+            ))}
+          </Slider>
+        </div>
+        {/* {localStorage.getItem("role") !== "viewer" ? (
+          <SubmitButton type="button" onClick={submitToFoundation}>
+            {submissionSuccess ? "Submitted" : "Submit to Upload"}
+          </SubmitButton>
+        ) : null} */}
+      </FormContainer>
+    );
+  }
+);
 
 function dataURLtoBlob(dataURL) {
   const parts = dataURL.split(",");
@@ -264,6 +348,7 @@ const Thumbnail = styled.img`
   object-fit: cover;
   border-radius: 5px;
   margin: 10px;
+  cursor: pointer;
 `;
 
 const SubmitButton = styled.button`
@@ -278,6 +363,35 @@ const SubmitButton = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+`;
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+`;
+
+const EnlargedImage = styled.img`
+  max-width: 75%;
+  max-height: 75%;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background-color: transparent;
+  border: none;
+  color: red;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
 `;
 
 export default InstallationForm;

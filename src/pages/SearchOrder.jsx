@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import IconHome from "../assets/icons/home.png";
 import { Link } from "react-router-dom";
+import Logout from "../assets/icons/pngwing.com.png";
 import styled from "styled-components";
 import IconWithText from "../components/IconWithTExt";
 import { useNavigate } from "react-router-dom";
@@ -92,11 +93,14 @@ const SearchOrder = () => {
       if (response.ok) {
         // Handle the response data
         const workOrderData = await response.json();
+        console.log("SO:", workOrderData);
         // Pass the data to the new route using route state
         navigate("/work-order", { state: workOrderData });
       } else if (response.status === 404) {
         // if work order does not exists
         const stateData = await response.json();
+        console.log(stateData);
+
         navigate("/work-order", { state: stateData.data });
       } else {
         console.error("Failed to fetch work order data");
@@ -117,6 +121,15 @@ const SearchOrder = () => {
       <NavBar className="nav-bar">
         <StyledLink to="/landing-page">
           <IconWithText iconSrc={IconHome} text="Home" />
+        </StyledLink>
+        <StyledLink to="/">
+          <IconWithText
+            onClick={() => {
+              localStorage.removeItem("role");
+            }}
+            iconSrc={Logout}
+            text="Logout"
+          />
         </StyledLink>
       </NavBar>
       <Heading>Search Work Order</Heading>
@@ -144,13 +157,15 @@ const SearchOrder = () => {
                   <ViewOrderButton
                     onClick={() => viewWorkOrder(result.invoiceNo)}
                   >
-                    View Order
+                    {localStorage.getItem("role") === "viewer"
+                      ? "View Order"
+                      : "View/Edit Order"}
                   </ViewOrderButton>
-                  <ViewInvoiceButton
+                  {/* <ViewInvoiceButton
                     onClick={() => viewInvoice(result.invoiceNo)}
                   >
                     View Invoice
-                  </ViewInvoiceButton>
+                  </ViewInvoiceButton> */}
                 </ButtonsContainer>
               </ResultTile>
             ))}
@@ -192,6 +207,7 @@ const NavBar = styled.nav`
   background: white;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 15px;
   border: 2px solid grey;
   border-radius: 5px;

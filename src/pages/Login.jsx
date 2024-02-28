@@ -2,47 +2,69 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
-
 const LoginPage = () => {
+  // State for managing username, password, and error message
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [userRole, setUserRole] = useState(null);
+  const [userName, setUserName] = useState(null);
   const [error, setError] = useState("");
+  // React Router hook for navigation
   const navigate = useNavigate();
+  // Access the authentication context
   const { setIsAuthenticated } = useAuth(); // Access the authentication context
-
   const handleLogin = async () => {
-    if (!password) {
-      setError("Password cannot be empty");
+    if (!username || !password) {
+      setError("Username and password cannot be empty");
       return;
     }
-
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/log`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "69420",
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ username, password }),
       });
-
       if (response.ok) {
-        console.log("Authentication successful");
-        setIsAuthenticated(true); // Set the authentication status to true
+        const responseData = await response.json();
+        console.log(responseData);
+        const { message, role, user } = responseData;
+        setUserRole(role);
+        setUserName(user);
+        localStorage.removeItem("role");
+        localStorage.setItem("role", role);
+        localStorage.removeItem("username");
+        localStorage.setItem("username", user);
+        // "admin\t"
+        // "viewer"
+        // "adminWO\t"
+        console.log(message);
+        setIsAuthenticated(true);
         navigate("/landing-page");
+      } else if (response.status === 401) {
+        setError("Incorrect username or password");
       } else {
-        setError("Authentication failed. Please check your password.");
+        setError("An error occurred. Please try again later.");
       }
     } catch (error) {
       console.error("Error while logging in:", error);
       setError("An error occurred. Please try again later.");
     }
   };
-
   return (
     <Container>
       <LoginForm>
-        <Title>App is password-protected</Title>
-        {error && <ErrorMessage>{error}</ErrorMessage>} {/* Display error message */}
+        <Title>Please log in to continue</Title>
+        {error && <ErrorMessage>{error}</ErrorMessage>}{" "}
+        {/* Display error message */}
+        <Input
+          type="username"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
         <Input
           type="password"
           placeholder="Password"
@@ -54,16 +76,13 @@ const LoginPage = () => {
     </Container>
   );
 };
-
 export default LoginPage;
-
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 `;
-
 const LoginForm = styled.div`
   background-color: #f5f5f5;
   padding: 20px;
@@ -73,13 +92,11 @@ const LoginForm = styled.div`
   width: 100%;
   max-width: 400px;
 `;
-
 const Title = styled.h2`
   font-size: 28px;
   color: #333;
   margin-bottom: 20px;
 `;
-
 const Input = styled.input`
   width: 100%;
   padding: 10px;
@@ -87,7 +104,6 @@ const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 5px;
 `;
-
 const LoginButton = styled.button`
   background-color: #007bff;
   color: white;
@@ -96,12 +112,10 @@ const LoginButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-
   &:hover {
     background-color: #0056b3;
   }
 `;
-
 const ErrorMessage = styled.p`
   color: red;
   margin-bottom: 10px;

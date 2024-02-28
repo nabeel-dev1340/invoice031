@@ -1,6 +1,9 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import styled from "styled-components";
 import { useLocation } from "react-router-dom";
 import IconWithText from "../components/IconWithTExt";
@@ -11,10 +14,12 @@ import ArtComponent from "../components/ArtComponent";
 import EngravingArt from "../components/EngravingArt";
 import InstallationForm from "../components/InstallationForm";
 import html2canvas from "html2canvas";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { generateGoogleMapsLink } from "../utils/get_maps_url";
 
 const WorkOrder = () => {
+  const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [workOrderSaved, setWorkOrderSaved] = useState(false);
@@ -22,6 +27,7 @@ const WorkOrder = () => {
   const [formData, setFormData] = useState({
     headStoneName: "",
     invoiceNo: "",
+    username: "",
     date: "",
     customerEmail: "",
     customerName: "",
@@ -30,6 +36,25 @@ const WorkOrder = () => {
     cemeteryAddress: "",
     cemeteryContact: "",
     lotNumber: "",
+    details: "",
+    model1: "",
+    selectModelImage1: "",
+    modelColor1: "",
+    customColor1: "",
+    model2: "",
+    selectModelImage2: "",
+    modelColor2: "",
+    customColor2: "",
+    model3: "",
+    selectModelImage3: "",
+    modelColor3: "",
+    customColor3: "",
+    model4: "",
+    modelColor4: "",
+    customColor4: "",
+    model5: "",
+    modelColor5: "",
+    customColor5: "",
     cemeterySubmission: [],
     engravingSubmission: [],
     foundationInstall: [],
@@ -37,6 +62,18 @@ const WorkOrder = () => {
     cemeteryApproval: [],
     finalArt: [],
   });
+
+  const artComponentRef = useRef();
+  const engravingArtRef = useRef();
+  const installationFormRef = useRef();
+
+  const triggerActionInChild = () => {
+    artComponentRef.current.submitToArt();
+    engravingArtRef.current.submitToEngraving();
+    installationFormRef.current.submitToFoundation();
+    submitToCemetery();
+    setSubmissionSuccess(true);
+  };
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,12 +88,14 @@ const WorkOrder = () => {
   useEffect(() => {
     if (location.state) {
       setFormData(location.state);
-      if(location.state?.cemeteryName==="Other"){
-        setFormData(prevData => ({
+      if (location.state?.cemeteryName === "Other") {
+        setFormData((prevData) => ({
           ...prevData,
           cemeteryName: location.state?.customCemetery || "",
+          username: localStorage.getItem("username"),
         }));
       }
+      console.log(formData);
       // Set uploaded images to cemeterySubmission
       if (location.state.cemeterySubmission) {
         const extractedBase64Images = location?.state?.cemeterySubmission?.map(
@@ -134,6 +173,8 @@ const WorkOrder = () => {
             formDataToSend.append(key, formData[key]);
           }
         }
+        console.log(formDataToSend);
+        formDataToSend.append("username", localStorage.getItem("username"));
 
         // Make a POST API call to the /work-order endpoint
         const response = await fetch(
@@ -191,7 +232,7 @@ const WorkOrder = () => {
 
       if (response.ok) {
         console.log("Submission to Cemetery successful!");
-        setSubmissionSuccess(true);
+        // setSubmissionSuccess(true);
         // Optionally, you can redirect or show a success message here
       } else {
         console.error("Submission to Cemetery failed.");
@@ -219,6 +260,32 @@ const WorkOrder = () => {
     setWorkOrderSaved(false);
   };
 
+  const handleThumbnailClick = (image) => {
+    setSelectedImage(image);
+  };
+
+  const closeModalImg = () => {
+    setSelectedImage(null);
+  };
+
+  const settings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: calculateSlidesToShow(),
+    slidesToScroll: 1,
+  };
+
+  function calculateSlidesToShow() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth >= 1200) {
+      return Math.min(7, uploadedImages.length);
+    } else if (screenWidth >= 768) {
+      return Math.min(5, uploadedImages.length);
+    } else {
+      return Math.min(3, uploadedImages.length);
+    }
+  }
   return (
     <Container>
       <NavBar className="nav-bar">
@@ -226,12 +293,17 @@ const WorkOrder = () => {
           <IconWithText iconSrc={IconHome} text="Home" />
         </StyledLink>
         <UtilityContainer>
-          <IconWithText
-            iconSrc={IconSave}
-            type="submit"
-            text={savingOrder ? "Saving..." : workOrderSaved ? "Saved" : "Save"}
-            onClick={handleSubmit}
-          />
+          {localStorage.getItem("role") !== "viewer" ? (
+            <IconWithText
+              iconSrc={IconSave}
+              type="submit"
+              text={
+                savingOrder ? "Saving..." : workOrderSaved ? "Saved" : "Save"
+              }
+              onClick={handleSubmit}
+            />
+          ) : null}
+
           <IconWithText
             iconSrc={IconPrint}
             type="button"
@@ -272,54 +344,218 @@ const WorkOrder = () => {
           <SectionTitle>Customer Design Approval</SectionTitle>
           <DesignForm>
             <InputLabel>Design Approved by Customer</InputLabel>
-            <ImageInput
-              type="file"
-              name="images"
-              multiple
-              onChange={handleImageUpload}
-            />
-            <ImagePreview>
-              {uploadedImages &&
-                uploadedImages.map((image, index) => (
-                  <div key={index} className="thumbnail-container">
-                    <span
-                      className="delete-button"
-                      onClick={() => removeThumbnail(index)}
-                    >
-                      &#x2716;
-                    </span>
-                    <Thumbnail
-                      className="thumbnail"
-                      src={image}
-                      alt="Non-Image file"
-                    />
-                  </div>
-                ))}
-            </ImagePreview>
-            <SubmitButton
-              type="button"
-              onClick={submitToCemetery}
-              disabled={uploadedImages.length <= 0 || submissionSuccess}
-            >
-              {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
-            </SubmitButton>
+            {/* {localStorage.getItem("role") !== "viewer" ? (
+              <ImageInput
+                type="file"
+                name="images"
+                multiple
+                onChange={handleImageUpload}
+              />
+            ) : null} */}
+            <div style={{ padding: "1rem" }}>
+              <Slider {...settings}>
+                {uploadedImages &&
+                  uploadedImages.map((image, index) => (
+                    <div key={index} className="thumbnail-container">
+                      {/* {localStorage.getItem("role") !== "viewer" ? (
+                      <span
+                        className="delete-button"
+                        onClick={() => removeThumbnail(index)}
+                      >
+                        &#x2716;
+                      </span>
+                    ) : null} */}
+
+                      <Thumbnail
+                        className="thumbnail"
+                        src={image}
+                        alt="Non-Image file"
+                        onClick={() => handleThumbnailClick(image)}
+                      />
+                    </div>
+                  ))}
+              </Slider>
+            </div>
+
+            {/* Modal for enlarged image */}
+            {selectedImage && (
+              <ModalOverlay onClick={closeModalImg}>
+                <CloseButton onClick={closeModalImg}>X</CloseButton>
+                <EnlargedImage src={selectedImage} alt="Enlarged Thumbnail" />
+              </ModalOverlay>
+            )}
+            {/* {localStorage.getItem("role") !== "viewer" ? (
+              <SubmitButton
+                type="button"
+                onClick={submitToCemetery}
+                disabled={uploadedImages.length <= 0 || submissionSuccess}
+              >
+                {submissionSuccess ? "Submitted" : "Submit to Cemetery"}
+              </SubmitButton>
+            ) : null} */}
           </DesignForm>
         </CustomerDesign>
         <ArtComponent
           headStoneName={formData.headStoneName}
           invoiceNo={formData.invoiceNo}
           finalArt={location.state?.finalArt || []}
-          cemeteryApproval={
-            location.state?.cemeteryApproval || []
-          }
+          cemeteryApproval={location.state?.cemeteryApproval || []}
+          ref={artComponentRef}
         />
         <EngravingArt
           headStoneName={formData.headStoneName}
           invoiceNo={formData.invoiceNo}
-          oldEngravingImage={
-            location.state?.engravingSubmission || []
-          }
+          oldEngravingImage={location.state?.engravingSubmission || []}
+          ref={engravingArtRef}
         />
+
+        <ModelInfo>
+          <SectionTitle>Models Information</SectionTitle>
+          <ModelGrid>
+            {formData.model1 && (
+              <ModelDetail>
+                <img
+                  src={formData.model1}
+                  style={{
+                    width: "120px",
+                    height: "85px",
+                    paddingBottom: "1rem",
+                  }}
+                  alt="Selected Model"
+                />
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Name:{" "}
+                  </ModelTitle>
+                  <DetailValue>{formData.selectModelImage1}</DetailValue>{" "}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Color:{" "}
+                  </ModelTitle>
+                  {formData.modelColor1 === "Custom Color" ? (
+                    <DetailValue>{formData.customColor1}</DetailValue>
+                  ) : (
+                    <DetailValue>{formData.modelColor1}</DetailValue>
+                  )}
+                </div>
+              </ModelDetail>
+            )}
+
+            {formData.model2 && (
+              <ModelDetail>
+                <img
+                  src={formData.model2}
+                  style={{
+                    width: "120px",
+                    height: "85px",
+                    paddingBottom: "1rem",
+                  }}
+                  alt="Selected Model"
+                />
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Name:{" "}
+                  </ModelTitle>
+                  <DetailValue>{formData.selectModelImage2}</DetailValue>{" "}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Color:{" "}
+                  </ModelTitle>
+                  {formData.modelColor2 === "Custom Color" ? (
+                    <DetailValue>{formData.customColor2}</DetailValue>
+                  ) : (
+                    <DetailValue>{formData.modelColor2}</DetailValue>
+                  )}
+                </div>
+              </ModelDetail>
+            )}
+
+            {formData.model3 && (
+              <ModelDetail>
+                <img
+                  src={formData.model3}
+                  style={{
+                    width: "120px",
+                    height: "85px",
+                    paddingBottom: "1rem",
+                  }}
+                  alt="Selected Model"
+                />
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Name:{" "}
+                  </ModelTitle>
+                  <DetailValue>{formData.selectModelImage3}</DetailValue>{" "}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Color:{" "}
+                  </ModelTitle>
+                  {formData.modelColor3 === "Custom Color" ? (
+                    <DetailValue>{formData.customColor3}</DetailValue>
+                  ) : (
+                    <DetailValue>{formData.modelColor3}</DetailValue>
+                  )}
+                </div>
+              </ModelDetail>
+            )}
+
+            {formData.model4 && (
+              <ModelDetail>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Name:{" "}
+                  </ModelTitle>
+                  <DetailValue>{formData.model4}</DetailValue>{" "}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Color:{" "}
+                  </ModelTitle>
+                  {formData.modelColor4 === "Custom Color" ? (
+                    <DetailValue>{formData.customColor4}</DetailValue>
+                  ) : (
+                    <DetailValue>{formData.modelColor4}</DetailValue>
+                  )}
+                </div>
+              </ModelDetail>
+            )}
+
+            {formData.model5 && (
+              <ModelDetail>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Name:{" "}
+                  </ModelTitle>
+                  <DetailValue>{formData.model5}</DetailValue>{" "}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <ModelTitle style={{ paddingRight: "1rem" }}>
+                    Model Color:{" "}
+                  </ModelTitle>
+                  {formData.modelColor5 === "Custom Color" ? (
+                    <DetailValue>{formData.customColor5}</DetailValue>
+                  ) : (
+                    <DetailValue>{formData.modelColor5}</DetailValue>
+                  )}
+                </div>
+              </ModelDetail>
+            )}
+          </ModelGrid>
+
+          <ModelDetail>
+            <ModelTitle style={{ paddingRight: "1rem" }}>Details:</ModelTitle>
+            <DetailValue>{formData.details}</DetailValue>
+          </ModelDetail>
+        </ModelInfo>
+
         <CemeteryInfo>
           <SectionTitle>Cemetery Information</SectionTitle>
           <CemeteryDetail>
@@ -328,7 +564,14 @@ const WorkOrder = () => {
           </CemeteryDetail>
           <CemeteryDetail>
             <DetailTitle>Cemetery Address:</DetailTitle>
-            <DetailValue>{formData.cemeteryAddress}</DetailValue>
+            <DetailValue>
+              <a
+                href={generateGoogleMapsLink(formData.cemeteryAddress)}
+                target="blank"
+              >
+                {formData.cemeteryAddress}
+              </a>
+            </DetailValue>
           </CemeteryDetail>
           <CemeteryDetail>
             <DetailTitle>Cemetery Contact:</DetailTitle>
@@ -342,11 +585,22 @@ const WorkOrder = () => {
             headStoneName={formData.headStoneName}
             invoiceNo={formData.invoiceNo}
             foundationInstall={location.state?.foundationInstall || []}
-            monumentSetting={
-              location.state?.monumentSetting || []
-            }
+            monumentSetting={location.state?.monumentSetting || []}
+            ref={installationFormRef}
           />
         </CemeteryInfo>
+        {localStorage.getItem("role") !== "viewer" ? (
+          <SubmitButton
+            type="button"
+            onClick={triggerActionInChild}
+            style={{
+              marginLeft: "1rem",
+              marginBottom: "2rem",
+            }}
+          >
+            {submissionSuccess ? "Submitted" : "Submit to Upload"}
+          </SubmitButton>
+        ) : null}
       </div>
       {workOrderSaved && (
         <SuccessModal>
@@ -442,6 +696,12 @@ const DetailTitle = styled.h3`
   margin-bottom: 5px;
 `;
 
+const ModelTitle = styled.h3`
+  font-size: 16px;
+  color: #000;
+  margin-bottom: 5px;
+`;
+
 const DetailValue = styled.p`
   font-size: 18px;
   color: #333;
@@ -513,6 +773,7 @@ const Thumbnail = styled.img`
   object-fit: cover;
   border-radius: 5px;
   margin: 10px;
+  cursor: pointer;
 `;
 
 const SubmitButton = styled.button`
@@ -538,6 +799,21 @@ const CemeteryInfo = styled.div`
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
+const ModelInfo = styled.div`
+  background: #e0e6aa;
+  width: 100%;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ModelGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two columns with equal width */
+  gap: 10px; /* Adjust the gap between grid items */
+`;
+
 const CemeteryDetail = styled.div`
   display: flex;
   flex-direction: column;
@@ -547,6 +823,18 @@ const CemeteryDetail = styled.div`
   @media (min-width: 768px) {
     flex-direction: row;
     justify-content: space-between;
+  }
+`;
+
+const ModelDetail = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+
+  @media (min-width: 768px) {
+    flex-direction: column;
+    justify-content: flex-start;
   }
 `;
 
@@ -591,4 +879,34 @@ const SuccessModalContent = styled.div`
       background-color: #0056b3;
     }
   }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+`;
+
+const EnlargedImage = styled.img`
+  max-width: 75%;
+  max-height: 75%;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background-color: transparent;
+  border: none;
+  color: red;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
 `;

@@ -123,6 +123,7 @@ const ImageModal = ({ isOpen, closeModal, handleImageSelect, modalIndex }) => {
     "standard",
     "statue",
     "vases",
+    "ceramics",
   ];
 
   return (
@@ -164,7 +165,9 @@ const ImageModal = ({ isOpen, closeModal, handleImageSelect, modalIndex }) => {
                 <img src={image.src} alt={`Model ${index + 1}`} />
                 <p>{image.title}</p>
                 <button
-                  onClick={() => handleImageSelect(image.src, image.title, modalIndex)}
+                  onClick={() =>
+                    handleImageSelect(image.src, image.title, modalIndex)
+                  }
                 >
                   Select
                 </button>
