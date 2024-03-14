@@ -268,12 +268,46 @@ const WorkOrder = () => {
     setSelectedImage(null);
   };
 
+  function SampleNextArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{
+          display: "block",
+          background: "orange",
+          paddingTop: ".1rem",
+          borderRadius: "50%",
+        }}
+        onClick={onClick}
+      />
+    );
+  }
+
+  function SamplePrevArrow(props) {
+    const { className, style, onClick } = props;
+    return (
+      <div
+        className={className}
+        style={{
+          display: "block",
+          background: "orange",
+          paddingTop: ".1rem",
+          borderRadius: "50%",
+        }}
+        onClick={onClick}
+      />
+    );
+  }
+
   const settings = {
     dots: true,
     infinite: false,
     speed: 500,
     slidesToShow: calculateSlidesToShow(),
     slidesToScroll: 1,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
   };
 
   function calculateSlidesToShow() {
@@ -355,9 +389,12 @@ const WorkOrder = () => {
             <div style={{ padding: "1rem" }}>
               <Slider {...settings}>
                 {uploadedImages &&
-                  uploadedImages.map((image, index) => (
-                    <div key={index} className="thumbnail-container">
-                      {/* {localStorage.getItem("role") !== "viewer" ? (
+                  uploadedImages
+                    .slice()
+                    .reverse()
+                    .map((image, index) => (
+                      <div key={index} className="thumbnail-container">
+                        {/* {localStorage.getItem("role") !== "viewer" ? (
                       <span
                         className="delete-button"
                         onClick={() => removeThumbnail(index)}
@@ -365,15 +402,41 @@ const WorkOrder = () => {
                         &#x2716;
                       </span>
                     ) : null} */}
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "100%",
+                          }}
+                        >
+                          <Thumbnail
+                            className="thumbnail"
+                            src={image}
+                            alt="Non-Image file"
+                            onClick={() => handleThumbnailClick(image)}
+                          />
+                        </div>
+                        {/* {formData.cemeterySubmission &&
+                          formData.cemeterySubmission[index] && (
+                            <ModifiedDate>
+                              Modified:{" "}
+                              {new Date(
+                                formData.cemeterySubmission[index].modifiedAt
+                              ).toLocaleString()}
+                            </ModifiedDate>
+                          )} */}
 
-                      <Thumbnail
-                        className="thumbnail"
-                        src={image}
-                        alt="Non-Image file"
-                        onClick={() => handleThumbnailClick(image)}
-                      />
-                    </div>
-                  ))}
+                        {formData.cemeterySubmission &&
+                          formData.cemeterySubmission[index] && (
+                            <ModifiedDate>
+                              {new Date(
+                                formData.cemeterySubmission[index].modifiedAt
+                              ).toLocaleDateString()}
+                            </ModifiedDate>
+                          )}
+                      </div>
+                    ))}
               </Slider>
             </div>
 
@@ -909,4 +972,11 @@ const CloseButton = styled.button`
   font-size: 30px;
   font-weight: bold;
   cursor: pointer;
+`;
+
+const ModifiedDate = styled.div`
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  color: gray;
+  text-align: center;
 `;

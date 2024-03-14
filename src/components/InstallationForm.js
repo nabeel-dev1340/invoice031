@@ -164,12 +164,45 @@ const InstallationForm = forwardRef(
     const closeModalImg = () => {
       setSelectedImage(null);
     };
+    function SampleNextArrow(props) {
+      const { className, style, onClick } = props;
+      return (
+        <div
+          className={className}
+          style={{
+            display: "block",
+            background: "lightblue",
+            paddingTop: ".1rem",
+            borderRadius: "50%",
+          }}
+          onClick={onClick}
+        />
+      );
+    }
+
+    function SamplePrevArrow(props) {
+      const { className, style, onClick } = props;
+      return (
+        <div
+          className={className}
+          style={{
+            display: "block",
+            background: "lightblue",
+            paddingTop: ".1rem",
+            borderRadius: "50%",
+          }}
+          onClick={onClick}
+        />
+      );
+    }
     const settings = {
       dots: true,
       infinite: false,
       speed: 500,
       slidesToShow: calculateSlidesToShow(),
       slidesToScroll: 1,
+      nextArrow: <SampleNextArrow />,
+      prevArrow: <SamplePrevArrow />,
     };
 
     function calculateSlidesToShow() {
@@ -189,6 +222,8 @@ const InstallationForm = forwardRef(
       speed: 500,
       slidesToShow: calculateSlidesToShow2(),
       slidesToScroll: 1,
+      nextArrow: <SampleNextArrow />,
+      prevArrow: <SamplePrevArrow />,
     };
 
     function calculateSlidesToShow2() {
@@ -216,9 +251,12 @@ const InstallationForm = forwardRef(
 
         <div style={{ padding: "1rem" }}>
           <Slider {...settings}>
-            {foundationInstallImagesBase64.map((image, index) => (
-              <div key={index} className="thumbnail-container">
-                {/* {localStorage.getItem("role") !== "viewer" ? (
+            {foundationInstallImagesBase64
+              .slice()
+              .reverse()
+              .map((image, index) => (
+                <div key={index} className="thumbnail-container">
+                  {/* {localStorage.getItem("role") !== "viewer" ? (
               <span
                 className="delete-button"
                 onClick={() => removeFoundationImage(index)}
@@ -226,14 +264,29 @@ const InstallationForm = forwardRef(
                 &#x2716;
               </span>
             ) : null} */}
-
-                <Thumbnail
-                  src={image}
-                  alt="Non-image file"
-                  onClick={() => handleThumbnailClick(image)}
-                />
-              </div>
-            ))}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <Thumbnail
+                      src={image}
+                      alt="Non-image file"
+                      onClick={() => handleThumbnailClick(image)}
+                    />
+                  </div>
+                  {foundationInstall && foundationInstall[index] && (
+                    <ModifiedDate>
+                      {new Date(
+                        foundationInstall[index].modifiedAt
+                      ).toLocaleDateString()}
+                    </ModifiedDate>
+                  )}
+                </div>
+              ))}
           </Slider>
         </div>
         {selectedImage && (
@@ -255,9 +308,12 @@ const InstallationForm = forwardRef(
         <div style={{ padding: "1rem" }}>
           <Slider {...settings2}>
             {/* Display monument setting images */}
-            {monumentSettingImagesBase64.map((image, index) => (
-              <div key={index} className="thumbnail-container">
-                {/* {localStorage.getItem("role") !== "viewer" ? (
+            {monumentSettingImagesBase64
+              .slice()
+              .reverse()
+              .map((image, index) => (
+                <div key={index} className="thumbnail-container">
+                  {/* {localStorage.getItem("role") !== "viewer" ? (
               <span
                 className="delete-button"
                 onClick={() => removeMonumentImage(index)}
@@ -265,14 +321,29 @@ const InstallationForm = forwardRef(
                 &#x2716;
               </span>
             ) : null} */}
-
-                <Thumbnail
-                  src={image}
-                  alt="Non-image file"
-                  onClick={() => handleThumbnailClick(image)}
-                />
-              </div>
-            ))}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <Thumbnail
+                      src={image}
+                      alt="Non-image file"
+                      onClick={() => handleThumbnailClick(image)}
+                    />
+                  </div>
+                  {monumentSetting && monumentSetting[index] && (
+                    <ModifiedDate>
+                      {new Date(
+                        monumentSetting[index].modifiedAt
+                      ).toLocaleDateString()}
+                    </ModifiedDate>
+                  )}
+                </div>
+              ))}
           </Slider>
         </div>
         {/* {localStorage.getItem("role") !== "viewer" ? (
@@ -392,6 +463,12 @@ const CloseButton = styled.button`
   font-size: 30px;
   font-weight: bold;
   cursor: pointer;
+`;
+const ModifiedDate = styled.div`
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  color: gray;
+  text-align: center;
 `;
 
 export default InstallationForm;

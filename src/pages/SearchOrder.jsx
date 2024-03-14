@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 
 const SearchOrder = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [loadingOrders, setLoadingOrders] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -51,35 +52,13 @@ const SearchOrder = () => {
     }
   };
 
-  const viewInvoice = async (invoiceNo) => {
-    // Make a GET API call using invoiceNo
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/invoice?invoiceNo=${invoiceNo}`,
-        {
-          method: "GET",
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        }
-      );
-
-      if (response.ok) {
-        // Handle the response data as needed
-        const invoiceData = await response.json();
-        // Pass the data to the new route using route state
-        navigate("/invoice-form", { state: invoiceData });
-      } else {
-        // Handle the case when the GET request fails
-        console.error("Failed to fetch invoice data");
-      }
-    } catch (error) {
-      console.error("Error fetching invoice data:", error);
-    }
-  };
-
   const viewWorkOrder = async (invoiceNo) => {
     try {
+      setLoadingOrders((prevLoadingOrders) => ({
+        ...prevLoadingOrders,
+        [invoiceNo]: true,
+      }));
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/work-order?invoiceNo=${invoiceNo}`,
         {
@@ -107,6 +86,11 @@ const SearchOrder = () => {
       }
     } catch (error) {
       console.error("Error fetching work order data:", error);
+    } finally {
+      setLoadingOrders((prevLoadingOrders) => ({
+        ...prevLoadingOrders,
+        [invoiceNo]: false,
+      }));
     }
   };
 
@@ -156,11 +140,15 @@ const SearchOrder = () => {
                 <ButtonsContainer>
                   <ViewOrderButton
                     onClick={() => viewWorkOrder(result.invoiceNo)}
+                    disabled={loadingOrders[result.invoiceNo]}
                   >
-                    {localStorage.getItem("role") === "viewer"
+                    {loadingOrders[result.invoiceNo]
+                      ? "Loading..."
+                      : localStorage.getItem("role") === "viewer"
                       ? "View Order"
                       : "View/Edit Order"}
                   </ViewOrderButton>
+
                   {/* <ViewInvoiceButton
                     onClick={() => viewInvoice(result.invoiceNo)}
                   >

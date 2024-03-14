@@ -114,6 +114,37 @@ const EngravingArt = forwardRef(
     const closeModalImg = () => {
       setSelectedImage(null);
     };
+    function SampleNextArrow(props) {
+      const { className, style, onClick } = props;
+      return (
+        <div
+          className={className}
+          style={{
+            display: "block",
+            background: "green",
+            paddingTop: ".1rem",
+            borderRadius: "50%",
+          }}
+          onClick={onClick}
+        />
+      );
+    }
+
+    function SamplePrevArrow(props) {
+      const { className, style, onClick } = props;
+      return (
+        <div
+          className={className}
+          style={{
+            display: "block",
+            background: "green",
+            paddingTop: ".1rem",
+            borderRadius: "50%",
+          }}
+          onClick={onClick}
+        />
+      );
+    }
 
     const settings = {
       dots: true,
@@ -121,6 +152,8 @@ const EngravingArt = forwardRef(
       speed: 500,
       slidesToShow: calculateSlidesToShow(),
       slidesToScroll: 1,
+      nextArrow: <SampleNextArrow />,
+      prevArrow: <SamplePrevArrow />,
     };
 
     function calculateSlidesToShow() {
@@ -149,9 +182,12 @@ const EngravingArt = forwardRef(
 
           <div style={{ padding: "1rem" }}>
             <Slider {...settings}>
-              {engravingImagesBase64.map((base64Image, index) => (
-                <div key={index} className="thumbnail-container">
-                  {/* {localStorage.getItem("role") !== "viewer" ? (
+              {engravingImagesBase64
+                .slice()
+                .reverse()
+                .map((base64Image, index) => (
+                  <div key={index} className="thumbnail-container">
+                    {/* {localStorage.getItem("role") !== "viewer" ? (
                 <span
                   className="delete-button"
                   onClick={() => removeEngravingImage(index)}
@@ -159,14 +195,29 @@ const EngravingArt = forwardRef(
                   &#x2716;
                 </span>
               ) : null} */}
-
-                  <Thumbnail
-                    src={base64Image}
-                    alt={`Engraving ${index}`}
-                    onClick={() => handleThumbnailClick(base64Image)}
-                  />
-                </div>
-              ))}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                      }}
+                    >
+                      <Thumbnail
+                        src={base64Image}
+                        alt={`Engraving ${index}`}
+                        onClick={() => handleThumbnailClick(base64Image)}
+                      />
+                    </div>
+                    {oldEngravingImage && oldEngravingImage[index] && (
+                      <ModifiedDate>
+                        {new Date(
+                          oldEngravingImage[index].modifiedAt
+                        ).toLocaleDateString()}
+                      </ModifiedDate>
+                    )}
+                  </div>
+                ))}
             </Slider>
           </div>
           {selectedImage && (
@@ -299,4 +350,10 @@ const CloseButton = styled.button`
   font-size: 30px;
   font-weight: bold;
   cursor: pointer;
+`;
+const ModifiedDate = styled.div`
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  color: gray;
+  text-align: center;
 `;

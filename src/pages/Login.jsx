@@ -1,18 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../context/AuthContext";
+
 const LoginPage = () => {
   // State for managing username, password, and error message
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [userRole, setUserRole] = useState(null);
-  const [userName, setUserName] = useState(null);
   const [error, setError] = useState("");
   // React Router hook for navigation
   const navigate = useNavigate();
   // Access the authentication context
   const { setIsAuthenticated } = useAuth(); // Access the authentication context
+
   const handleLogin = async () => {
     if (!username || !password) {
       setError("Username and password cannot be empty");
@@ -31,15 +31,10 @@ const LoginPage = () => {
         const responseData = await response.json();
         console.log(responseData);
         const { message, role, user } = responseData;
-        setUserRole(role);
-        setUserName(user);
         localStorage.removeItem("role");
         localStorage.setItem("role", role);
         localStorage.removeItem("username");
         localStorage.setItem("username", user);
-        // "admin\t"
-        // "viewer"
-        // "adminWO\t"
         console.log(message);
         setIsAuthenticated(true);
         navigate("/landing-page");
@@ -53,6 +48,20 @@ const LoginPage = () => {
       setError("An error occurred. Please try again later.");
     }
   };
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        handleLogin();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleLogin]);
+
   return (
     <Container>
       <LoginForm>
@@ -60,7 +69,7 @@ const LoginPage = () => {
         {error && <ErrorMessage>{error}</ErrorMessage>}{" "}
         {/* Display error message */}
         <Input
-          type="username"
+          type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -76,13 +85,16 @@ const LoginPage = () => {
     </Container>
   );
 };
+
 export default LoginPage;
+
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 `;
+
 const LoginForm = styled.div`
   background-color: #f5f5f5;
   padding: 20px;
@@ -92,11 +104,13 @@ const LoginForm = styled.div`
   width: 100%;
   max-width: 400px;
 `;
+
 const Title = styled.h2`
   font-size: 28px;
   color: #333;
   margin-bottom: 20px;
 `;
+
 const Input = styled.input`
   width: 100%;
   padding: 10px;
@@ -104,6 +118,7 @@ const Input = styled.input`
   border: 1px solid #ccc;
   border-radius: 5px;
 `;
+
 const LoginButton = styled.button`
   background-color: #007bff;
   color: white;
@@ -116,6 +131,7 @@ const LoginButton = styled.button`
     background-color: #0056b3;
   }
 `;
+
 const ErrorMessage = styled.p`
   color: red;
   margin-bottom: 10px;

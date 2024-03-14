@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 
 const SearchInvoice = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [loadingOrders, setLoadingOrders] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -54,6 +55,11 @@ const SearchInvoice = () => {
   const viewInvoice = async (invoiceNo) => {
     // Make a GET API call using invoiceNo
     try {
+      setLoadingOrders((prevLoadingOrders) => ({
+        ...prevLoadingOrders,
+        [invoiceNo]: true,
+      }));
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL}/invoice?invoiceNo=${invoiceNo}`,
         {
@@ -153,9 +159,11 @@ const SearchInvoice = () => {
                 <ButtonsContainer>
                   <ViewInvoiceButton
                     onClick={() => viewInvoice(result.invoiceNo)}
+                    disabled={loadingOrders[result.invoiceNo]}
                   >
-                    {" "}
-                    {localStorage.getItem("role") === "viewer"
+                    {loadingOrders[result.invoiceNo]
+                      ? "Loading..."
+                      : localStorage.getItem("role") === "viewer"
                       ? "View Invoice"
                       : "View/Edit Invoice"}
                   </ViewInvoiceButton>

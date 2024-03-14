@@ -203,7 +203,6 @@ const InvoicehtmlForm = () => {
     modelQty5: "",
     modelPrice5: "",
   });
-  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let updatedFormData = { ...formData, [name]: value };
@@ -278,7 +277,12 @@ const InvoicehtmlForm = () => {
     const subTotal = parseFloat(updatedFormData.subTotal);
     const delivery = parseFloat(updatedFormData.delivery);
     const foundation = parseFloat(updatedFormData.foundation);
+    const deposit = parseFloat(updatedFormData.deposit);
+    const balance = parseFloat(updatedFormData.balance);
     const discountAmount = parseFloat(updatedFormData.discount); // Retrieve the discount amount
+
+    const depositIsValid = !isNaN(deposit);
+    const balanceIsValid = !isNaN(balance);
 
     // Calculate the total without discount
     let totalBeforeTax = subTotal;
@@ -440,7 +444,6 @@ const InvoicehtmlForm = () => {
         const newDeposit = {
           depositAmount: depositAmount.toFixed(2),
           date: new Date().toISOString().split("T")[0],
-          paymentMethod: formData.paymentMethod,
         };
 
         // Perform actions like updating state with the deposit
@@ -702,11 +705,12 @@ const InvoicehtmlForm = () => {
           <AccountsSection>
             <div className="model-row">
               <div className="model-input model-flex">
-                <label htmlFor="model">Model:</label>
+                {/* <label htmlFor="model">Model:</label> */}
                 <SelectModelButton
                   type="button"
                   onClick={() => handleOpenModal(1)}
                   disabled={localStorage.getItem("role") === "viewer"}
+                  style={{ width: "9.5rem" }}
                 >
                   Select Model
                 </SelectModelButton>
@@ -791,11 +795,12 @@ const InvoicehtmlForm = () => {
             </div>
             <div className="model-row">
               <div className="model-input model-flex">
-                <label htmlFor="model">Model:</label>
+                {/* <label htmlFor="model">Model:</label> */}
                 <SelectModelButton
                   type="button"
                   onClick={() => handleOpenModal(2)}
                   disabled={localStorage.getItem("role") === "viewer"}
+                  style={{ width: "9.5rem" }}
                 >
                   Select Model
                 </SelectModelButton>
@@ -879,11 +884,12 @@ const InvoicehtmlForm = () => {
             </div>
             <div className="model-row">
               <div className="model-input model-flex">
-                <label htmlFor="model">Model:</label>
+                {/* <label htmlFor="model">Model:</label> */}
                 <SelectModelButton
                   type="button"
                   onClick={() => handleOpenModal(3)}
                   disabled={localStorage.getItem("role") === "viewer"}
+                  style={{ width: "9.5rem" }}
                 >
                   Select Model
                 </SelectModelButton>
@@ -967,7 +973,7 @@ const InvoicehtmlForm = () => {
             </div>
             <div className="model-row">
               <div className="model-input model-flex">
-                <label htmlFor="model">Model:</label>
+                {/* <label htmlFor="model">Model:</label> */}
                 <input
                   type="text"
                   name="model4"
@@ -976,7 +982,7 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter model"
-                  style={{ width: "108px" }}
+                  style={{ width: "10rem" }}
                 />
               </div>
               <div className="model-color model-flex">
@@ -1046,7 +1052,7 @@ const InvoicehtmlForm = () => {
             </div>
             <div className="model-row">
               <div className="model-input model-flex">
-                <label htmlFor="model">Model:</label>
+                {/* <label htmlFor="model">Model:</label> */}
                 <input
                   type="text"
                   name="model5"
@@ -1055,7 +1061,7 @@ const InvoicehtmlForm = () => {
                   readOnly={localStorage.getItem("role") === "viewer"}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter model"
-                  style={{ width: "108px" }}
+                  style={{ width: "10rem" }}
                 />
               </div>
               <div className="model-color model-flex">
@@ -1328,7 +1334,7 @@ const InvoicehtmlForm = () => {
                         <div key={index} className="deposit-item">
                           <p>
                             <b>Deposit {`${index + 1}: `}</b>
-                            {`$${dep.depositAmount}`} on {dep.date} {`(${dep.paymentMethod})`}
+                            {`$${dep.depositAmount}`} on {dep.date}
                           </p>
                         </div>
                       ))}

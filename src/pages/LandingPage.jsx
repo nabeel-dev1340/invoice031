@@ -7,6 +7,7 @@ import IconWithText from "../components/IconWithTExt";
 import { Link } from "react-router-dom";
 import invoiceImage from "../assets/images/invoice.png";
 import searchImage from "../assets/images/search.png";
+import reportImage from "../assets/images/report.png";
 import searchInvoice from "../assets/images/pngwing.com.png";
 import { useAuth } from "../context/AuthContext";
 
@@ -68,6 +69,9 @@ const LandingPage = () => {
             </StyledLink>
             <StyledLink to="/search-order">
               <Option imageSrc={searchImage} text="Search Order" />
+            </StyledLink>
+            <StyledLink to="/report">
+              <Option imageSrc={reportImage} text="Report" />
             </StyledLink>
           </OptionContainer>
         ) : localStorage.getItem("role") === "viewer" ? (
