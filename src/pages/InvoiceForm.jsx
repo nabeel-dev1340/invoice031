@@ -444,6 +444,7 @@ const InvoicehtmlForm = () => {
         const newDeposit = {
           depositAmount: depositAmount.toFixed(2),
           date: new Date().toISOString().split("T")[0],
+          paymentMethod: formData.paymentMethod,
         };
 
         // Perform actions like updating state with the deposit
@@ -1334,7 +1335,7 @@ const InvoicehtmlForm = () => {
                         <div key={index} className="deposit-item">
                           <p>
                             <b>Deposit {`${index + 1}: `}</b>
-                            {`$${dep.depositAmount}`} on {dep.date}
+                            {`$${dep.depositAmount}`} on {dep.date} {`(${dep.paymentMethod})`}
                           </p>
                         </div>
                       ))}
