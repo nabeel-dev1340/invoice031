@@ -51,12 +51,7 @@ export default function Report() {
         console.log(formattedStartDate, formattedEndDate);
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/reports?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,{
-            method: "GET",
-            headers: {
-              "ngrok-skip-browser-warning": "69420",
-            },
-          }
+          `${process.env.REACT_APP_API_URL}/reports?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
         );
         const data = await response.json();
         setReports(data.reports);
@@ -125,6 +120,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 Date
@@ -134,6 +130,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 Time
@@ -143,6 +140,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 User
@@ -152,6 +150,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 Headstone
@@ -161,6 +160,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 Invoice
@@ -170,6 +170,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 Work Order
@@ -179,6 +180,7 @@ export default function Report() {
                   fontSize: "18px",
                   padding: "8px",
                   border: "1px solid #ddd",
+                  fontWeight: "bold",
                 }}
               >
                 Deposit
@@ -193,6 +195,7 @@ export default function Report() {
                     padding: "8px",
                     border: "1px solid #ddd",
                     fontSize: "15px",
+                    fontWeight: "bold",
                   }}
                 >
                   {report.date}
@@ -202,6 +205,7 @@ export default function Report() {
                     padding: "8px",
                     border: "1px solid #ddd",
                     fontSize: "15px",
+                    fontWeight: "bold",
                   }}
                 >
                   {report.time}
@@ -209,6 +213,7 @@ export default function Report() {
                 <TableCell
                   style={{
                     padding: "8px",
+                    fontWeight: "bold",
                     border: "1px solid #ddd",
                     fontSize: "15px",
                   }}
@@ -218,6 +223,7 @@ export default function Report() {
                 <TableCell
                   style={{
                     padding: "8px",
+                    fontWeight: "bold",
                     border: "1px solid #ddd",
                     fontSize: "15px",
                   }}
@@ -227,6 +233,7 @@ export default function Report() {
                 <TableCell
                   style={{
                     padding: "8px",
+                    fontWeight: "bold",
                     border: "1px solid #ddd",
                     fontSize: "15px",
                   }}
@@ -236,6 +243,7 @@ export default function Report() {
                 <TableCell
                   style={{
                     padding: "8px",
+                    fontWeight: "bold",
                     border: "1px solid #ddd",
                     fontSize: "15px",
                   }}
@@ -245,6 +253,7 @@ export default function Report() {
                 <TableCell
                   style={{
                     padding: "8px",
+                    fontWeight: "bold",
                     border: "1px solid #ddd",
                     fontSize: "15px",
                   }}
@@ -260,6 +269,7 @@ export default function Report() {
                   textAlign: "right",
                   fontSize: "18px",
                   padding: "8px",
+                  fontWeight: "bold",
                   border: "1px solid #ddd",
                 }}
               >
@@ -269,6 +279,7 @@ export default function Report() {
                 style={{
                   fontSize: "18px",
                   padding: "8px",
+                  fontWeight: "bold",
                   border: "1px solid #ddd",
                 }}
               >

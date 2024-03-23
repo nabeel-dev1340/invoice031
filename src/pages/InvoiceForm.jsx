@@ -494,10 +494,14 @@ const InvoicehtmlForm = () => {
               className="input-row"
               style={{ width: "80%", margin: "0 auto" }}
             >
-              <label htmlFor="name" style={{ marginRight: "10px" }}>
+              <label
+                htmlFor="name"
+                style={{ marginRight: "10px", fontWeight: "bold" }}
+              >
                 Name on Headstone:
               </label>
               <input
+                style={{ fontWeight: "bold" }}
                 type="text"
                 id="name"
                 name="headstoneName"
@@ -510,7 +514,11 @@ const InvoicehtmlForm = () => {
               />
             </div>
             <div className="input-row">
-              <label htmlFor="invoice" className="flexy">
+              <label
+                style={{ fontWeight: "bold" }}
+                htmlFor="invoice"
+                className="flexy"
+              >
                 Invoice Number:
               </label>
               <input
@@ -519,8 +527,13 @@ const InvoicehtmlForm = () => {
                 name="invoiceNo"
                 value={formData.invoiceNo}
                 readOnly
+                style={{ fontWeight: "bold" }}
               />
-              <label htmlFor="date" className="flexy">
+              <label
+                style={{ fontWeight: "bold" }}
+                htmlFor="date"
+                className="flexy"
+              >
                 Date:
               </label>
               <input
@@ -530,6 +543,7 @@ const InvoicehtmlForm = () => {
                 value={formData.date}
                 onChange={handleInputChange}
                 readOnly={localStorage.getItem("role") === "viewer"}
+                style={{ fontWeight: "bold" }}
               />
             </div>
           </HeadstoneInfoSection>
@@ -539,7 +553,9 @@ const InvoicehtmlForm = () => {
               <tbody>
                 <tr className="input-row">
                   <th>
-                    <label htmlFor="cemetery">Cemetery:</label>
+                    <label style={{ fontWeight: "bold" }} htmlFor="cemetery">
+                      Cemetery:
+                    </label>
                   </th>
                   <td colSpan="3">
                     <select
@@ -548,6 +564,7 @@ const InvoicehtmlForm = () => {
                       value={formData.cemetery}
                       onChange={handleInputChange}
                       disabled={localStorage.getItem("role") === "viewer"}
+                      style={{ fontWeight: "bold" }}
                     >
                       <option value="">Select Cemetery</option>
                       {cemeteryNames.map((cemeteryName) => (
@@ -571,7 +588,9 @@ const InvoicehtmlForm = () => {
                 </tr>
                 <tr className="input-row">
                   <th>
-                    <label htmlFor="address">Address:</label>
+                    <label htmlFor="address" style={{ fontWeight: "bold" }}>
+                      Address:
+                    </label>
                   </th>
                   <td>
                     <input
@@ -582,10 +601,16 @@ const InvoicehtmlForm = () => {
                       value={formData.cemeteryAddress}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
+                      style={{ fontWeight: "bold" }}
                     />
                   </td>
                   <th>
-                    <label htmlFor="cemeteryContact">Cemetery Contact:</label>
+                    <label
+                      htmlFor="cemeteryContact"
+                      style={{ fontWeight: "bold" }}
+                    >
+                      Cemetery Contact:
+                    </label>
                   </th>
                   <td>
                     <input
@@ -596,10 +621,13 @@ const InvoicehtmlForm = () => {
                       value={formData.cemeteryContact}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
+                      style={{ fontWeight: "bold" }}
                     />
                   </td>
                   <th>
-                    <label htmlFor="phone">Phone:</label>
+                    <label htmlFor="phone" style={{ fontWeight: "bold" }}>
+                      Phone:
+                    </label>
                   </th>
                   <td>
                     <input
@@ -610,12 +638,15 @@ const InvoicehtmlForm = () => {
                       value={formData.cemeteryPhone}
                       readOnly={localStorage.getItem("role") === "viewer"}
                       onKeyPress={handleKeyPress}
+                      style={{ fontWeight: "bold" }}
                     />
                   </td>
                 </tr>
                 <tr className="input-row">
                   <th>
-                    <label htmlFor="zone">Zone:</label>
+                    <label htmlFor="zone" style={{ fontWeight: "bold" }}>
+                      Zone:
+                    </label>
                   </th>
                   <td>
                     <input
@@ -626,10 +657,13 @@ const InvoicehtmlForm = () => {
                       readOnly={localStorage.getItem("role") === "viewer"}
                       onChange={handleInputChange}
                       onKeyPress={handleKeyPress}
+                      style={{ fontWeight: "bold" }}
                     />
                   </td>
                   <th>
-                    <label htmlFor="lotOwner">Lot Owner:</label>
+                    <label htmlFor="lotOwner" style={{ fontWeight: "bold" }}>
+                      Lot Owner:
+                    </label>
                   </th>
                   <td>
                     <input
@@ -641,10 +675,13 @@ const InvoicehtmlForm = () => {
                       readOnly={localStorage.getItem("role") === "viewer"}
                       onKeyPress={handleKeyPress}
                       placeholder="Enter Lot"
+                      style={{ fontWeight: "bold" }}
                     />
                   </td>
                   <th>
-                    <label htmlFor="lotNumber">Lot Number:</label>
+                    <label htmlFor="lotNumber" style={{ fontWeight: "bold" }}>
+                      Lot Number:
+                    </label>
                   </th>
                   <td>
                     <input
@@ -656,6 +693,7 @@ const InvoicehtmlForm = () => {
                       onKeyPress={handleKeyPress}
                       readOnly={localStorage.getItem("role") === "viewer"}
                       placeholder="Enter lot number"
+                      style={{ fontWeight: "bold" }}
                     />
                   </td>
                 </tr>
@@ -665,7 +703,9 @@ const InvoicehtmlForm = () => {
           <HorizontalRule />
           <CustomerDetailsSection>
             <div className="row">
-              <label htmlFor="customerName">Customer Name:</label>
+              <label htmlFor="customerName" style={{ fontWeight: "bold" }}>
+                Customer Name:
+              </label>
               <input
                 type="text"
                 id="customerName"
@@ -675,8 +715,11 @@ const InvoicehtmlForm = () => {
                 readOnly={localStorage.getItem("role") === "viewer"}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter customer name"
+                style={{ fontWeight: "bold" }}
               />
-              <label htmlFor="phone">Phone:</label>
+              <label htmlFor="phone" style={{ fontWeight: "bold" }}>
+                Phone:
+              </label>
               <input
                 type="text"
                 id="phone"
@@ -686,10 +729,13 @@ const InvoicehtmlForm = () => {
                 readOnly={localStorage.getItem("role") === "viewer"}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter customer phone"
+                style={{ fontWeight: "bold" }}
               />
             </div>
             <div className="row">
-              <label htmlFor="email">Email:</label>
+              <label htmlFor="email" style={{ fontWeight: "bold" }}>
+                Email:
+              </label>
               <input
                 type="email"
                 id="email"
@@ -699,6 +745,7 @@ const InvoicehtmlForm = () => {
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter customer email"
+                style={{ fontWeight: "bold" }}
               />
             </div>
           </CustomerDetailsSection>
@@ -711,7 +758,7 @@ const InvoicehtmlForm = () => {
                   type="button"
                   onClick={() => handleOpenModal(1)}
                   disabled={localStorage.getItem("role") === "viewer"}
-                  style={{ width: "9.5rem" }}
+                  style={{ width: "9.5rem", fontWeight: "bold" }}
                 >
                   Select Model
                 </SelectModelButton>
@@ -723,19 +770,22 @@ const InvoicehtmlForm = () => {
                     style={{ width: "100px", height: "70px" }}
                     alt="Selected Model"
                   />
-                  <p style={{ textAlign: "center" }}>
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>
                     {formData.selectModelImage1}
                   </p>
                 </div>
               )}
               <div className="model-color model-flex">
-                <label htmlFor="model-color">Color:</label>
+                <label htmlFor="model-color" style={{ fontWeight: "bold" }}>
+                  Color:
+                </label>
                 <select
                   id="model-color"
                   name="modelColor1"
                   value={formData.modelColor1}
                   onChange={handleInputChange}
                   disabled={localStorage.getItem("role") === "viewer"}
+                  style={{ fontWeight: "bold" }}
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -762,13 +812,16 @@ const InvoicehtmlForm = () => {
                     style={{
                       maxWidth: "100%",
                       width: "6rem",
+                      fontWeight: "bold",
                     }}
                   />
                 )}
               </div>
 
               <div className="model-qty model-flex">
-                <label htmlFor="model-qty">Qty:</label>
+                <label htmlFor="model-qty" style={{ fontWeight: "bold" }}>
+                  Qty:
+                </label>
                 <input
                   type="number"
                   name="modelQty1"
@@ -778,11 +831,17 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
-                  style={{ width: "100%", maxWidth: "3.8em" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "3.8em",
+                    fontWeight: "bold",
+                  }}
                 />
               </div>
               <div className="model-price model-flex">
-                <label htmlFor="model-price">Price:</label>
+                <label htmlFor="model-price" style={{ fontWeight: "bold" }}>
+                  Price:
+                </label>
                 <input
                   type="text"
                   name="modelPrice1"
@@ -791,6 +850,7 @@ const InvoicehtmlForm = () => {
                   readOnly={localStorage.getItem("role") === "viewer"}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
+                  style={{ fontWeight: "bold" }}
                 />
               </div>
             </div>
@@ -801,7 +861,7 @@ const InvoicehtmlForm = () => {
                   type="button"
                   onClick={() => handleOpenModal(2)}
                   disabled={localStorage.getItem("role") === "viewer"}
-                  style={{ width: "9.5rem" }}
+                  style={{ width: "9.5rem", fontWeight: "bold" }}
                 >
                   Select Model
                 </SelectModelButton>
@@ -813,19 +873,22 @@ const InvoicehtmlForm = () => {
                     style={{ width: "100px", height: "70px" }}
                     alt="Selected Model"
                   />
-                  <p style={{ textAlign: "center" }}>
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>
                     {formData.selectModelImage2}
                   </p>
                 </div>
               )}
               <div className="model-color model-flex">
-                <label htmlFor="model-color">Color:</label>
+                <label htmlFor="model-color" style={{ fontWeight: "bold" }}>
+                  Color:
+                </label>
                 <select
                   id="model-color"
                   name="modelColor2"
                   disabled={localStorage.getItem("role") === "viewer"}
                   value={formData.modelColor2}
                   onChange={handleInputChange}
+                  style={{ fontWeight: "bold" }}
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -852,12 +915,15 @@ const InvoicehtmlForm = () => {
                     style={{
                       maxWidth: "100%",
                       width: "6rem",
+                      fontWeight: "bold",
                     }}
                   />
                 )}
               </div>
               <div className="model-qty model-flex">
-                <label htmlFor="model-qty">Qty:</label>
+                <label htmlFor="model-qty" style={{ fontWeight: "bold" }}>
+                  Qty:
+                </label>
                 <input
                   type="number"
                   readOnly={localStorage.getItem("role") === "viewer"}
@@ -867,11 +933,17 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
-                  style={{ width: "100%", maxWidth: "3.8em" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "3.8em",
+                    fontWeight: "bold",
+                  }}
                 />
               </div>
               <div className="model-price model-flex">
-                <label htmlFor="model-price">Price:</label>
+                <label htmlFor="model-price" style={{ fontWeight: "bold" }}>
+                  Price:
+                </label>
                 <input
                   type="text"
                   name="modelPrice2"
@@ -880,6 +952,7 @@ const InvoicehtmlForm = () => {
                   onKeyPress={handleKeyPress}
                   readOnly={localStorage.getItem("role") === "viewer"}
                   placeholder="Enter Price"
+                  style={{ fontWeight: "bold" }}
                 />
               </div>
             </div>
@@ -890,7 +963,7 @@ const InvoicehtmlForm = () => {
                   type="button"
                   onClick={() => handleOpenModal(3)}
                   disabled={localStorage.getItem("role") === "viewer"}
-                  style={{ width: "9.5rem" }}
+                  style={{ width: "9.5rem", fontWeight: "bold" }}
                 >
                   Select Model
                 </SelectModelButton>
@@ -902,19 +975,22 @@ const InvoicehtmlForm = () => {
                     style={{ width: "100px", height: "70px" }}
                     alt="Selected Model"
                   />
-                  <p style={{ textAlign: "center" }}>
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>
                     {formData.selectModelImage3}
                   </p>
                 </div>
               )}
               <div className="model-color model-flex">
-                <label htmlFor="model-color">Color:</label>
+                <label htmlFor="model-color" style={{ fontWeight: "bold" }}>
+                  Color:
+                </label>
                 <select
                   id="model-color"
                   name="modelColor3"
                   disabled={localStorage.getItem("role") === "viewer"}
                   value={formData.modelColor3}
                   onChange={handleInputChange}
+                  style={{ fontWeight: "bold" }}
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -941,12 +1017,15 @@ const InvoicehtmlForm = () => {
                     style={{
                       maxWidth: "100%",
                       width: "6rem",
+                      fontWeight: "bold",
                     }}
                   />
                 )}
               </div>
               <div className="model-qty model-flex">
-                <label htmlFor="model-qty">Qty:</label>
+                <label htmlFor="model-qty" style={{ fontWeight: "bold" }}>
+                  Qty:
+                </label>
                 <input
                   type="number"
                   name="modelQty3"
@@ -956,11 +1035,17 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
-                  style={{ width: "100%", maxWidth: "3.8em" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "3.8em",
+                    fontWeight: "bold",
+                  }}
                 />
               </div>
               <div className="model-price model-flex">
-                <label htmlFor="model-price">Price:</label>
+                <label htmlFor="model-price" style={{ fontWeight: "bold" }}>
+                  Price:
+                </label>
                 <input
                   type="text"
                   name="modelPrice3"
@@ -969,6 +1054,7 @@ const InvoicehtmlForm = () => {
                   readOnly={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
                   placeholder="Enter Price"
+                  style={{ fontWeight: "bold" }}
                 />
               </div>
             </div>
@@ -983,17 +1069,20 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter model"
-                  style={{ width: "10rem" }}
+                  style={{ width: "10rem", fontWeight: "bold" }}
                 />
               </div>
               <div className="model-color model-flex">
-                <label htmlFor="model-color">Color:</label>
+                <label htmlFor="model-color" style={{ fontWeight: "bold" }}>
+                  Color:
+                </label>
                 <select
                   id="model-color"
                   name="modelColor4"
                   value={formData.modelColor4}
                   disabled={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
+                  style={{ fontWeight: "bold" }}
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -1020,12 +1109,15 @@ const InvoicehtmlForm = () => {
                     style={{
                       maxWidth: "100%",
                       width: "6rem",
+                      fontWeight: "bold",
                     }}
                   />
                 )}
               </div>
               <div className="model-qty model-flex">
-                <label htmlFor="model-qty">Qty:</label>
+                <label htmlFor="model-qty" style={{ fontWeight: "bold" }}>
+                  Qty:
+                </label>
                 <input
                   type="number"
                   name="modelQty4"
@@ -1035,11 +1127,17 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
-                  style={{ width: "100%", maxWidth: "3.8em" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "3.8em",
+                    fontWeight: "bold",
+                  }}
                 />
               </div>
               <div className="model-price model-flex">
-                <label htmlFor="model-price">Price:</label>
+                <label htmlFor="model-price" style={{ fontWeight: "bold" }}>
+                  Price:
+                </label>
                 <input
                   type="text"
                   name="modelPrice4"
@@ -1048,6 +1146,7 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
+                  style={{ fontWeight: "bold" }}
                 />
               </div>
             </div>
@@ -1062,17 +1161,20 @@ const InvoicehtmlForm = () => {
                   readOnly={localStorage.getItem("role") === "viewer"}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter model"
-                  style={{ width: "10rem" }}
+                  style={{ width: "10rem", fontWeight: "bold" }}
                 />
               </div>
               <div className="model-color model-flex">
-                <label htmlFor="model-color">Color:</label>
+                <label htmlFor="model-color" style={{ fontWeight: "bold" }}>
+                  Color:
+                </label>
                 <select
                   id="model-color"
                   name="modelColor5"
                   value={formData.modelColor5}
                   disabled={localStorage.getItem("role") === "viewer"}
                   onChange={handleInputChange}
+                  style={{ fontWeight: "bold" }}
                 >
                   <option value="">Select Color</option>
                   {Object.keys(colorOptions).map((color) => (
@@ -1099,12 +1201,15 @@ const InvoicehtmlForm = () => {
                     style={{
                       maxWidth: "100%",
                       width: "6rem",
+                      fontWeight: "bold",
                     }}
                   />
                 )}
               </div>
               <div className="model-qty model-flex">
-                <label htmlFor="model-qty">Qty:</label>
+                <label htmlFor="model-qty" style={{ fontWeight: "bold" }}>
+                  Qty:
+                </label>
                 <input
                   type="number"
                   name="modelQty5"
@@ -1114,11 +1219,17 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Quantity"
-                  style={{ width: "100%", maxWidth: "3.8em" }}
+                  style={{
+                    width: "100%",
+                    maxWidth: "3.8em",
+                    fontWeight: "bold",
+                  }}
                 />
               </div>
               <div className="model-price model-flex">
-                <label htmlFor="model-price">Price:</label>
+                <label htmlFor="model-price" style={{ fontWeight: "bold" }}>
+                  Price:
+                </label>
                 <input
                   type="text"
                   name="modelPrice5"
@@ -1127,13 +1238,16 @@ const InvoicehtmlForm = () => {
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter Price"
+                  style={{ fontWeight: "bold" }}
                 />
               </div>
             </div>
             <div className="details-row">
               <div className="left-section">
                 <div className="details-input">
-                  <label htmlFor="details">Details:</label>
+                  <label htmlFor="details" style={{ fontWeight: "bold" }}>
+                    Details:
+                  </label>
                   <textarea
                     id="details"
                     name="details"
@@ -1143,6 +1257,7 @@ const InvoicehtmlForm = () => {
                     value={formData.details}
                     onChange={handleInputChange}
                     placeholder="Enter details here"
+                    style={{ fontWeight: "bold" }}
                   ></textarea>
                 </div>
                 <div className="end-note">
@@ -1183,17 +1298,22 @@ const InvoicehtmlForm = () => {
               <div className="right-section">
                 <div className="total-inputs">
                   <div className="sub-total model-flex-right">
-                    <label htmlFor="sub-total">Sub Total:</label>
+                    <label htmlFor="sub-total" style={{ fontWeight: "bold" }}>
+                      Sub Total:
+                    </label>
                     <input
                       type="number"
                       name="subTotal"
                       value={formData.subTotal}
                       onChange={handleInputChange}
                       readOnly
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="tax model-flex-right">
-                    <label htmlFor="tax">Tax:</label>
+                    <label htmlFor="tax" style={{ fontWeight: "bold" }}>
+                      Tax:
+                    </label>
                     <input
                       type="number"
                       name="tax"
@@ -1201,10 +1321,13 @@ const InvoicehtmlForm = () => {
                       onChange={handleInputChange}
                       placeholder="8.25% of total"
                       readOnly
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="delivery model-flex-right">
-                    <label htmlFor="delivery">Stake/Delivery:</label>
+                    <label htmlFor="delivery" style={{ fontWeight: "bold" }}>
+                      Stake/Delivery:
+                    </label>
                     <input
                       type="number"
                       name="delivery"
@@ -1213,10 +1336,13 @@ const InvoicehtmlForm = () => {
                       onKeyPress={handleKeyPress}
                       placeholder="Enter amount"
                       readOnly={localStorage.getItem("role") === "viewer"}
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="foundation model-flex-right">
-                    <label htmlFor="foundation">Setting/Foundation:</label>
+                    <label htmlFor="foundation" style={{ fontWeight: "bold" }}>
+                      Setting/Foundation:
+                    </label>
                     <input
                       type="number"
                       name="foundation"
@@ -1225,10 +1351,13 @@ const InvoicehtmlForm = () => {
                       onChange={handleInputChange}
                       placeholder="Enter amount"
                       readOnly={localStorage.getItem("role") === "viewer"}
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="discount model-flex-right">
-                    <label htmlFor="discount">Discount:</label>
+                    <label htmlFor="discount" style={{ fontWeight: "bold" }}>
+                      Discount:
+                    </label>
                     <input
                       type="number"
                       name="discount"
@@ -1236,20 +1365,26 @@ const InvoicehtmlForm = () => {
                       onKeyPress={handleKeyPress}
                       onChange={handleInputChange}
                       readOnly={localStorage.getItem("role") === "viewer"}
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="total model-flex-right">
-                    <label htmlFor="total">Total</label>
+                    <label htmlFor="total" style={{ fontWeight: "bold" }}>
+                      Total
+                    </label>
                     <input
                       type="number"
                       name="total"
                       value={formData.total}
                       onChange={handleInputChange}
                       readOnly
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="deposit model-flex-right">
-                    <label htmlFor="deposit">Deposit:</label>
+                    <label htmlFor="deposit" style={{ fontWeight: "bold" }}>
+                      Deposit:
+                    </label>
                     <input
                       type="number"
                       name="deposit"
@@ -1258,10 +1393,16 @@ const InvoicehtmlForm = () => {
                       onChange={handleInputChange}
                       placeholder="Enter amount"
                       readOnly={localStorage.getItem("role") === "viewer"}
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
                   <div className="paymentMethod model-flex-right">
-                    <label htmlFor="paymentMethod">Payment Method:</label>
+                    <label
+                      htmlFor="paymentMethod"
+                      style={{ fontWeight: "bold" }}
+                    >
+                      Payment Method:
+                    </label>
                     <div
                       className=""
                       style={{
@@ -1269,6 +1410,7 @@ const InvoicehtmlForm = () => {
                         flexDirection: "row",
                         gap: ".8rem",
                         paddingLeft: ".5rem",
+                        fontWeight: "bold",
                       }}
                     >
                       <div className="">
@@ -1320,16 +1462,22 @@ const InvoicehtmlForm = () => {
                   </div>
 
                   <div className="balance model-flex-right">
-                    <label htmlFor="balance">Balance:</label>
+                    <label htmlFor="balance" style={{ fontWeight: "bold" }}>
+                      Balance:
+                    </label>
                     <input
                       type="number"
                       name="balance"
                       value={formData.balance}
                       onChange={handleInputChange}
                       readOnly
+                      style={{ fontWeight: "bold" }}
                     />
                   </div>
-                  <div className="deposits model-flex-rght">
+                  <div
+                    className="deposits model-flex-rght"
+                    style={{ fontWeight: "bold" }}
+                  >
                     {deposits.length > 0 &&
                       deposits.map((dep, index) => (
                         <div key={index} className="deposit-item">
