@@ -51,7 +51,12 @@ export default function Report() {
         console.log(formattedStartDate, formattedEndDate);
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/reports?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+          `${process.env.REACT_APP_API_URL}/reports?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,{
+            method: "GET",
+            headers: {
+              "ngrok-skip-browser-warning": "69420",
+            },
+          }
         );
         const data = await response.json();
         setReports(data.reports);
