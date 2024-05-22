@@ -19,6 +19,7 @@ import jsPDF from "jspdf";
 import * as htmlToImage from "html-to-image";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import WorkOrderPDF from "./WorkOrderPDF";
 
 const InvoicehtmlForm = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -28,6 +29,7 @@ const InvoicehtmlForm = () => {
   const [deposits, setDeposits] = useState([]);
   const [selectedCemetery, setSelectedCemetery] = useState("");
   const [customCemetery, setCustomCemetery] = useState("");
+  const [showPDF, setShowPDF] = useState(false);
 
   const location = useLocation();
 
@@ -153,6 +155,11 @@ const InvoicehtmlForm = () => {
     invoiceNo: "",
     date: "",
     username: "",
+    requestDate: "",
+    followUpDate1: "",
+    followUpDate2: "",
+    approvedDate: "",
+    notesWork: "",
     cemetery: "",
     cemeteryAddress: "",
     cemeteryContact: "",
@@ -179,6 +186,7 @@ const InvoicehtmlForm = () => {
     paymentMethod: "",
     balance: "",
     details: "",
+    notes: "",
     model2: "",
     selectModelImage2: "",
     modelColor2: "",
@@ -335,108 +343,126 @@ const InvoicehtmlForm = () => {
 
   const captureFormSnapshot = async () => {
     const pdf = new jsPDF({
-      unit: "mm", // Use millimeters as the unit of measurement
-      format: "a4", // Set the paper size to A4
+      unit: "mm",
+      format: "letter",
+    });
+
+    const pdf2 = new jsPDF({
+      unit: "mm",
+      format: "letter",
     });
 
     // Capture the form as an image using html-to-image
     const element = document.getElementById("invoice-form");
+    const element2 = document.getElementById("work-order-pdf");
+
+    if (!element) {
+      console.error("Element with ID 'invoice-form' does not exist.");
+      return;
+    }
+
+    if (!element2) {
+      console.error("Element with ID 'work-order-pdf' does not exist.");
+      return;
+    }
+
     const imageDataUrl = await htmlToImage.toPng(element);
+    const imageDataUrl2 = await htmlToImage.toPng(element2);
 
-    // Create an Image object for the captured image
+    // Create an Image object for the captured images
     const img = new Image();
+    const img2 = new Image();
     img.src = imageDataUrl;
+    img2.src = imageDataUrl2;
 
-    img.onload = async function () {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
+    // Wait for both images to load
+    await Promise.all([
+      new Promise((resolve) => {
+        img.onload = resolve;
+      }),
+      new Promise((resolve) => {
+        img2.onload = resolve;
+      }),
+    ]);
 
-      // Get the width and height of the captured image
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
+    // Add the captured images to the PDFs
+    pdf.addImage(img, "PNG", 0, 0, 215.9, 279.4);
+    pdf2.addImage(img2, "PNG", 0, 0, 215.9, 279.4);
 
-      // Calculate the aspect ratio to fit the canvas within the A4 paper size
-      const aspectRatio = canvasWidth / canvasHeight;
+    // Save the PDFs as blobs
+    const pdfBlob = pdf.output("blob");
+    const pdfBlob2 = pdf2.output("blob");
 
-      // Calculate the width and height of the image in the PDF
-      let pdfWidth = 190; // A4 paper width in millimeters
-      let pdfHeight = pdfWidth / aspectRatio;
+    // Create a FormData object to send the blobs to the backend
+    const finalFormData = new FormData();
+    finalFormData.append("pdf", pdfBlob, "invoice.pdf");
+    finalFormData.append("pdf2", pdfBlob2, "work-order.pdf");
 
-      // Ensure that the image fits within the A4 paper size
-      if (pdfHeight > 277) {
-        pdfHeight = 277; // A4 paper height in millimeters
-        pdfWidth = pdfHeight * aspectRatio;
+    for (const key in formData) {
+      if (
+        key === "delivery" ||
+        key === "discount" ||
+        key === "foundation" ||
+        key === "modelPrice1" ||
+        key === "modelPrice2" ||
+        key === "modelPrice3" ||
+        key === "modelPrice4" ||
+        key === "modelPrice5"
+      ) {
+        // Check if the string value is not empty
+        if (formData[key] !== "") {
+          // Round the value to two decimal places
+          formData[key] = parseFloat(formData[key]).toFixed(2);
+        }
       }
+    }
 
-      // Calculate the center position to place the image on the A4 page
-      const xPosition = (210 - pdfWidth) / 2; // A4 paper width is 210mm
-      const yPosition = (297 - pdfHeight) / 2; // A4 paper height is 297mm
+    // Append each field of formData to finalFormData
+    for (const key in formData) {
+      if (formData.hasOwnProperty(key)) {
+        finalFormData.append(key, formData[key]);
+      }
+    }
 
-      // Add the captured image to the PDF
-      pdf.addImage(
-        imageDataUrl,
-        "PNG",
-        xPosition,
-        yPosition,
-        pdfWidth,
-        pdfHeight
+    try {
+      // Make an API call to save the PDFs and additional data on the backend
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/save-invoice`, // Replace with your backend API endpoint
+        finalFormData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "ngrok-skip-browser-warning": "69420",
+          },
+        }
       );
 
-      // Save the PDF as a blob
-      const pdfBlob = pdf.output("blob");
-
-      //delete custom Cemetery
-      if (selectedCemetery !== "Other") {
-        delete formData?.customCemetery;
-      }
-
-      // Create a FormData object to send the blob to the backend
-      const finalFormData = new FormData();
-      finalFormData.append("pdf", pdfBlob, "invoice.pdf");
-      // Append each field of formData to finalFormData
-      for (const key in formData) {
-        if (formData.hasOwnProperty(key)) {
-          finalFormData.append(key, formData[key]);
-        }
-      }
-
-      try {
-        // Make an API call to save the PDF and additional data on the backend
-        const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/save-invoice`, // Replace with your backend API endpoint
-          finalFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              "ngrok-skip-browser-warning": "69420",
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          // Success, you can handle it as needed
-          console.log("PDF and data saved successfully");
-          console.log(formData);
-          // Show success modal
-          handleSuccessModalOpen();
-          setSaveButtonText("Saved");
-        } else {
-          console.error("Failed to save PDF and data");
-          setSaveButtonText("Save");
-        }
-      } catch (error) {
-        console.error("Error while saving PDF and data:", error);
+      if (response.status === 200) {
+        // Success, you can handle it as needed
+        console.log("PDFs and data saved successfully");
+        console.log(formData);
+        // Show success modal
+        setShowPDF(false);
+        localStorage.removeItem("invoiceData");
+        const updatedFormData = { ...formData, deposit: "" };
+        setFormData(updatedFormData);
+        handleSuccessModalOpen();
+        setSaveButtonText("Saved");
+      } else {
+        console.error("Failed to save PDFs and data");
         setSaveButtonText("Save");
       }
-    };
+    } catch (error) {
+      console.error("Error while saving PDFs and data:", error);
+      setSaveButtonText("Save");
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaveButtonText("Saving..");
+    localStorage.setItem("invoiceData", JSON.stringify(formData));
+    setShowPDF(true);
     try {
       // Update deposit
       if (!isNaN(parseFloat(formData.deposit))) {
@@ -480,11 +506,11 @@ const InvoicehtmlForm = () => {
                 text={saveButtonText}
               />
             ) : null}
-            <IconWithText
+            {/* <IconWithText
               iconSrc={IconPrint}
               onClick={handlePrint}
               text="Print"
-            />
+            /> */}
           </UtilityContainer>
         </NavBar>
         <div id="invoice-form">
@@ -959,27 +985,18 @@ const InvoicehtmlForm = () => {
             <div className="model-row">
               <div className="model-input model-flex">
                 {/* <label htmlFor="model">Model:</label> */}
-                <SelectModelButton
-                  type="button"
-                  onClick={() => handleOpenModal(3)}
-                  disabled={localStorage.getItem("role") === "viewer"}
-                  style={{ width: "9.5rem", fontWeight: "bold" }}
-                >
-                  Select Model
-                </SelectModelButton>
+                <input
+                  type="text"
+                  name="model3"
+                  readOnly={localStorage.getItem("role") === "viewer"}
+                  value={formData.model3}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Enter model"
+                  style={{ width: "10rem", fontWeight: "bold" }}
+                />
               </div>
-              {formData.model3 !== "" && (
-                <div className="selected-image">
-                  <img
-                    src={formData.model3}
-                    style={{ width: "100px", height: "70px" }}
-                    alt="Selected Model"
-                  />
-                  <p style={{ textAlign: "center", fontWeight: "bold" }}>
-                    {formData.selectModelImage3}
-                  </p>
-                </div>
-              )}
+
               <div className="model-color model-flex">
                 <label htmlFor="model-color" style={{ fontWeight: "bold" }}>
                   Color:
@@ -1251,46 +1268,60 @@ const InvoicehtmlForm = () => {
                   <textarea
                     id="details"
                     name="details"
-                    rows="9"
+                    rows="5"
                     cols="60"
                     readOnly={localStorage.getItem("role") === "viewer"}
                     value={formData.details}
                     onChange={handleInputChange}
                     placeholder="Enter details here"
+                    maxLength={320}
+                    style={{ fontWeight: "bold" }}
+                  ></textarea>
+                </div>
+
+                <div className="notes-input">
+                  <label htmlFor="notes" style={{ fontWeight: "bold" }}>
+                    Notes:
+                  </label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    rows="5"
+                    cols="60"
+                    readOnly={localStorage.getItem("role") === "viewer"}
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    placeholder="Enter notes here"
+                    maxLength={320}
                     style={{ fontWeight: "bold" }}
                   ></textarea>
                 </div>
                 <div className="end-note">
                   <p>
-                    Make all checks payable to Headstone World Houston
+                    Make all checks payable to Headstone World Houston.
                     <br />
-                    <span className="grey-highlight">
-                      Complete orders left over 30 days subject to storage fee
-                    </span>
-                    <br />
-                    Customer Responsible for Cemetery fee
-                    <br />
-                    <span className="grey-highlight">
-                      All purchases are not eligible for refund or exhange
-                    </span>
-                    <br />
-                    Headstone World is not responsible for mistakes
-                    <br />
-                    which appear in signed and approved orders
-                    <br />
-                    <br />
-                    <strong>NOTE: </strong>
-                    <em>
-                      The negative balance displayed reflects an excess
-                      <br />
-                      in billed amounts over the deposited funds.This does not
-                      <br />
-                      indicate a credit or amount owed to you.
-                      <br />
-                    </em>
                     <strong>
-                      Order left over 30 days incur a monthly storage charge of
-                      $50.
+                      Customers are responsible for any cemetery fees.
+                    </strong>
+                    <br />
+                    All purchases are not eligible for refunds or exchanges.
+                    <br />
+                    <br />
+                    <strong>
+                      Headstone World is not responsible for errors that appear
+                      in signed and approved orders.
+                    </strong>
+                    <br />
+                    Clarity of lasered images is not guaranteed for unapproved
+                    resolutions of source images.
+                    <br />
+                    Headstone World is subject to shipping delays; time
+                    estimates are subject to change.
+                    <br />
+                    <br />
+                    <strong>
+                      Completed orders left for over 30 days are subject to a
+                      storage fee.
                     </strong>
                   </p>
                 </div>
@@ -1479,14 +1510,18 @@ const InvoicehtmlForm = () => {
                     style={{ fontWeight: "bold" }}
                   >
                     {deposits.length > 0 &&
-                      deposits.map((dep, index) => (
-                        <div key={index} className="deposit-item">
-                          <p>
-                            <b>Deposit {`${index + 1}: `}</b>
-                            {`$${dep.depositAmount}`} on {dep.date} {`(${dep.paymentMethod})`}
-                          </p>
-                        </div>
-                      ))}
+                      deposits
+                        .slice(-4)
+                        .reverse()
+                        .map((dep, index) => (
+                          <div key={index} className="deposit-item">
+                            <p>
+                              <b>Deposit {`${deposits.length - index}: `}</b>
+                              {`$${dep.depositAmount}`} on {dep.date}{" "}
+                              {`(${dep.paymentMethod})`}
+                            </p>
+                          </div>
+                        ))}
                   </div>
                 </div>
               </div>
@@ -1529,6 +1564,7 @@ const InvoicehtmlForm = () => {
         model5={formData?.model5}
         modelColor5={formData?.modelColor5}
       />
+      {showPDF && <WorkOrderPDF />}
     </Container>
   );
 };
@@ -1757,6 +1793,18 @@ const AccountsSection = styled.section`
   }
 
   #details {
+    padding: 5px;
+    resize: none;
+  }
+
+  .notes-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  #notes {
     padding: 5px;
     resize: none;
   }

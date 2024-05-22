@@ -122,6 +122,7 @@ const ImageModal = ({ isOpen, closeModal, handleImageSelect, modalIndex }) => {
     "slanted",
     "standard",
     "statue",
+    "bronze",
     "vases",
     "ceramics",
   ];

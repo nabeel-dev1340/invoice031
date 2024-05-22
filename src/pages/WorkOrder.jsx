@@ -32,6 +32,11 @@ const WorkOrder = () => {
     customerEmail: "",
     customerName: "",
     customerPhone: "",
+    requestDate: "",
+    followUpDate1: "",
+    followUpDate2: "",
+    approvedDate: "",
+    notesWork: "",
     cemeteryName: "",
     cemeteryAddress: "",
     cemeteryContact: "",
@@ -68,10 +73,10 @@ const WorkOrder = () => {
   const installationFormRef = useRef();
 
   const triggerActionInChild = () => {
-    artComponentRef.current.submitToArt();
+    // artComponentRef.current.submitToArt();
     engravingArtRef.current.submitToEngraving();
     installationFormRef.current.submitToFoundation();
-    submitToCemetery();
+    // submitToCemetery();
     setSubmissionSuccess(true);
   };
 
@@ -87,6 +92,7 @@ const WorkOrder = () => {
 
   useEffect(() => {
     if (location.state) {
+      console.log(location.state);
       setFormData(location.state);
       if (location.state?.cemeteryName === "Other") {
         setFormData((prevData) => ({
@@ -95,7 +101,6 @@ const WorkOrder = () => {
           username: localStorage.getItem("username"),
         }));
       }
-      console.log(formData);
       // Set uploaded images to cemeterySubmission
       if (location.state.cemeterySubmission) {
         const extractedBase64Images = location?.state?.cemeterySubmission?.map(
@@ -106,39 +111,39 @@ const WorkOrder = () => {
     }
   }, [location.state]);
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
+  // const handleImageUpload = (e) => {
+  //   const files = Array.from(e.target.files);
 
-    // Convert uploaded images to base64 strings and store them
-    const base64Images = [];
+  //   // Convert uploaded images to base64 strings and store them
+  //   const base64Images = [];
 
-    const loadImages = async () => {
-      for (const file of files) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          base64Images.push(reader.result);
-          if (base64Images.length === files.length) {
-            // When all images are loaded, update the state
-            setUploadedImages((prevImages) => [...prevImages, ...base64Images]);
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    };
+  //   const loadImages = async () => {
+  //     for (const file of files) {
+  //       const reader = new FileReader();
+  //       reader.onload = () => {
+  //         base64Images.push(reader.result);
+  //         if (base64Images.length === files.length) {
+  //           // When all images are loaded, update the state
+  //           setUploadedImages((prevImages) => [...prevImages, ...base64Images]);
+  //         }
+  //       };
+  //       reader.readAsDataURL(file);
+  //     }
+  //   };
 
-    loadImages();
-  };
+  //   loadImages();
+  // };
 
-  const removeThumbnail = (index) => {
-    const updatedImages = [...uploadedImages];
-    updatedImages.splice(index, 1);
-    setUploadedImages(updatedImages);
-  };
+  // const removeThumbnail = (index) => {
+  //   const updatedImages = [...uploadedImages];
+  //   updatedImages.splice(index, 1);
+  //   setUploadedImages(updatedImages);
+  // };
 
-  const handlePrint = () => {
-    document.title = "Computerized Print";
-    window.print();
-  };
+  // const handlePrint = () => {
+  //   document.title = "Computerized Print";
+  //   window.print();
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,6 +180,12 @@ const WorkOrder = () => {
         }
         console.log(formDataToSend);
         formDataToSend.append("username", localStorage.getItem("username"));
+        formDataToSend.append("requestDate", formData.requestDate);
+        formDataToSend.append("followUpDate1", formData.followUpDate1);
+        formDataToSend.append("followUpDate2", formData.followUpDate2);
+        formDataToSend.append("approvedDate", formData.approvedDate);
+        formDataToSend.append("notes", formData.notes);
+        // console.log("testing", formDataToSend);
 
         // Make a POST API call to the /work-order endpoint
         const response = await fetch(
@@ -205,44 +216,44 @@ const WorkOrder = () => {
     }
   };
 
-  const submitToCemetery = async () => {
-    try {
-      const formDataToSend = new FormData();
+  // const submitToCemetery = async () => {
+  //   try {
+  //     const formDataToSend = new FormData();
 
-      formDataToSend.append("headStoneName", formData.headStoneName);
-      formDataToSend.append("invoiceNo", formData.invoiceNo);
+  //     formDataToSend.append("headStoneName", formData.headStoneName);
+  //     formDataToSend.append("invoiceNo", formData.invoiceNo);
 
-      // Convert base64 strings to Blobs and append them
-      uploadedImages.forEach((base64Image, index) => {
-        const blob = dataURLtoBlob(base64Image);
-        formDataToSend.append("images", blob, `image${index}.png`);
-      });
+  //     // Convert base64 strings to Blobs and append them
+  //     uploadedImages.forEach((base64Image, index) => {
+  //       const blob = dataURLtoBlob(base64Image);
+  //       formDataToSend.append("images", blob, `image${index}.png`);
+  //     });
 
-      // Make the API call
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/submit-to-cemetery`,
-        {
-          method: "POST",
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-          body: formDataToSend,
-        }
-      );
+  //     // Make the API call
+  //     const response = await fetch(
+  //       `${process.env.REACT_APP_API_URL}/submit-to-cemetery`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "ngrok-skip-browser-warning": "69420",
+  //         },
+  //         body: formDataToSend,
+  //       }
+  //     );
 
-      if (response.ok) {
-        console.log("Submission to Cemetery successful!");
-        // setSubmissionSuccess(true);
-        // Optionally, you can redirect or show a success message here
-      } else {
-        console.error("Submission to Cemetery failed.");
-        // Handle the error, show an error message, or retry the submission
-      }
-    } catch (error) {
-      console.error("Error while submitting to Cemetery:", error);
-      // Handle the error, show an error message, or retry the submission
-    }
-  };
+  //     if (response.ok) {
+  //       console.log("Submission to Cemetery successful!");
+  //       // setSubmissionSuccess(true);
+  //       // Optionally, you can redirect or show a success message here
+  //     } else {
+  //       console.error("Submission to Cemetery failed.");
+  //       // Handle the error, show an error message, or retry the submission
+  //     }
+  //   } catch (error) {
+  //     console.error("Error while submitting to Cemetery:", error);
+  //     // Handle the error, show an error message, or retry the submission
+  //   }
+  // };
 
   function dataURLtoBlob(dataURL) {
     const parts = dataURL.split(",");
@@ -338,12 +349,12 @@ const WorkOrder = () => {
             />
           ) : null}
 
-          <IconWithText
+          {/* <IconWithText
             iconSrc={IconPrint}
             type="button"
             onClick={handlePrint}
             text="Print"
-          />
+          /> */}
         </UtilityContainer>
       </NavBar>
       <div id="work-order">
@@ -539,20 +550,11 @@ const WorkOrder = () => {
 
             {formData.model3 && (
               <ModelDetail>
-                <img
-                  src={formData.model3}
-                  style={{
-                    width: "120px",
-                    height: "85px",
-                    paddingBottom: "1rem",
-                  }}
-                  alt="Selected Model"
-                />
                 <div style={{ display: "flex", flexDirection: "row" }}>
                   <ModelTitle style={{ paddingRight: "1rem" }}>
                     Model Name:{" "}
                   </ModelTitle>
-                  <DetailValue>{formData.selectModelImage3}</DetailValue>{" "}
+                  <DetailValue>{formData.model3}</DetailValue>{" "}
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "row" }}>
@@ -625,6 +627,123 @@ const WorkOrder = () => {
             <DetailTitle>Cemetery Name:</DetailTitle>
             <DetailValue>{formData.cemeteryName}</DetailValue>
           </CemeteryDetail>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#A9A9A9",
+              padding: "5px",
+              paddingTop: "15px",
+              marginTop: "10px",
+              paddingBottom: "15px",
+              marginBottom: "10px",
+            }}
+          >
+            <div style={{ display: "flex", gap: "12px" }}>
+              <div>
+                <label style={{ marginRight: "4px", fontWeight: "bold" }}>
+                  Request
+                </label>
+                <input
+                  style={{
+                    fontWeight: "bold",
+                    padding: "5px",
+                    border: "solid black 2px",
+                  }}
+                  type="date"
+                  readOnly={localStorage.getItem("role") === "viewer"}
+                  value={formData.requestDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, requestDate: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label style={{ marginRight: "4px", fontWeight: "bold" }}>
+                  Follow up
+                </label>
+                <input
+                  style={{
+                    fontWeight: "bold",
+                    padding: "5px",
+                    border: "solid black 2px",
+                  }}
+                  type="date"
+                  value={formData.followUpDate1}
+                  readOnly={localStorage.getItem("role") === "viewer"}
+                  onChange={(e) =>
+                    setFormData({ ...formData, followUpDate1: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label style={{ marginRight: "4px", fontWeight: "bold" }}>
+                  Follow up
+                </label>
+                <input
+                  style={{
+                    fontWeight: "bold",
+                    padding: "5px",
+                    border: "solid black 2px",
+                  }}
+                  type="date"
+                  readOnly={localStorage.getItem("role") === "viewer"}
+                  value={formData.followUpDate2}
+                  onChange={(e) =>
+                    setFormData({ ...formData, followUpDate2: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label style={{ marginRight: "4px", fontWeight: "bold" }}>
+                  Approved
+                </label>
+                <input
+                  style={{
+                    fontWeight: "bold",
+                    padding: "5px",
+                    border: "solid black 2px",
+                  }}
+                  type="date"
+                  readOnly={localStorage.getItem("role") === "viewer"}
+                  value={formData.approvedDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, approvedDate: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div style={{ display: "flex", marginTop: "15px" }}>
+              <label
+                htmlFor="notes"
+                style={{ fontWeight: "bold", marginRight: "4px" }}
+              >
+                Notes
+              </label>
+              <textarea
+                id="notesWork"
+                name="notesWork"
+                rows="3"
+                cols="85"
+                readOnly={localStorage.getItem("role") === "viewer"}
+                value={formData.notesWork}
+                onChange={(e) =>
+                  setFormData({ ...formData, notesWork: e.target.value })
+                }
+                placeholder="Enter notes here"
+                maxLength={360}
+                style={{
+                  fontWeight: "bold",
+                  border: "solid black 2px",
+                  borderRadius: "10px",
+                  padding: "5px",
+                  maxWidth: "100%",
+                }}
+              ></textarea>
+            </div>
+          </div>
           <CemeteryDetail>
             <DetailTitle>Cemetery Address:</DetailTitle>
             <DetailValue>

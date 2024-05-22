@@ -74,86 +74,86 @@ const ArtComponent = forwardRef(
       loadImages();
     };
 
-    useImperativeHandle(ref, () => ({
-      submitToArt: async () => {
-        // e.preventDefault();
+    // useImperativeHandle(ref, () => ({
+    //   submitToArt: async () => {
+    //     // e.preventDefault();
 
-        if (
-          finalArtImagesBase64.length > 0 ||
-          cemeteryApprovalImagesBase64.length > 0
-        ) {
-          try {
-            const formDataToSend = new FormData();
-            formDataToSend.append("headstoneName", headStoneName);
-            formDataToSend.append("invoiceNo", invoiceNo);
-            formDataToSend.append(
-              "finalArtLength",
-              finalArtImagesBase64.length
-            );
-            formDataToSend.append(
-              "cemeteryArtLength",
-              cemeteryApprovalImagesBase64.length
-            );
+    //     if (
+    //       finalArtImagesBase64.length > 0 ||
+    //       cemeteryApprovalImagesBase64.length > 0
+    //     ) {
+    //       try {
+    //         const formDataToSend = new FormData();
+    //         formDataToSend.append("headstoneName", headStoneName);
+    //         formDataToSend.append("invoiceNo", invoiceNo);
+    //         formDataToSend.append(
+    //           "finalArtLength",
+    //           finalArtImagesBase64.length
+    //         );
+    //         formDataToSend.append(
+    //           "cemeteryArtLength",
+    //           cemeteryApprovalImagesBase64.length
+    //         );
 
-            // Append final art images
-            finalArtImagesBase64.forEach((base64Image, index) => {
-              const blob = dataURLtoBlob(base64Image);
-              formDataToSend.append(
-                `finalArtImages`,
-                blob,
-                `image${index}.png`
-              );
-            });
+    //         // Append final art images
+    //         finalArtImagesBase64.forEach((base64Image, index) => {
+    //           const blob = dataURLtoBlob(base64Image);
+    //           formDataToSend.append(
+    //             `finalArtImages`,
+    //             blob,
+    //             `image${index}.png`
+    //           );
+    //         });
 
-            cemeteryApprovalImagesBase64.forEach((base64Image, index) => {
-              const blob = dataURLtoBlob(base64Image);
-              formDataToSend.append(
-                `finalArtImages`,
-                blob,
-                `image${index}.png`
-              );
-            });
+    //         cemeteryApprovalImagesBase64.forEach((base64Image, index) => {
+    //           const blob = dataURLtoBlob(base64Image);
+    //           formDataToSend.append(
+    //             `finalArtImages`,
+    //             blob,
+    //             `image${index}.png`
+    //           );
+    //         });
 
-            // Make a POST request to your API endpoint
-            const response = await fetch(
-              `${process.env.REACT_APP_API_URL}/art-submission`,
-              {
-                method: "POST",
-                headers: {
-                  "ngrok-skip-browser-warning": "69420",
-                },
-                body: formDataToSend,
-              }
-            );
+    //         // Make a POST request to your API endpoint
+    //         const response = await fetch(
+    //           `${process.env.REACT_APP_API_URL}/art-submission`,
+    //           {
+    //             method: "POST",
+    //             headers: {
+    //               "ngrok-skip-browser-warning": "69420",
+    //             },
+    //             body: formDataToSend,
+    //           }
+    //         );
 
-            if (response.ok) {
-              // Handle successful response (e.g., show a success message)
-              console.log("Art submission successful!");
-              setSubmissionSuccess(true);
-            } else {
-              // Handle error response
-              console.error("Art submission failed.");
-            }
-          } catch (error) {
-            console.error("Error submitting art:", error);
-          }
-        } else {
-          console.log("No images to submit");
-        }
-      },
-    }));
+    //         if (response.ok) {
+    //           // Handle successful response (e.g., show a success message)
+    //           console.log("Art submission successful!");
+    //           setSubmissionSuccess(true);
+    //         } else {
+    //           // Handle error response
+    //           console.error("Art submission failed.");
+    //         }
+    //       } catch (error) {
+    //         console.error("Error submitting art:", error);
+    //       }
+    //     } else {
+    //       console.log("No images to submit");
+    //     }
+    //   },
+    // }));
 
-    const removeFinalArtImage = (index) => {
-      const updatedImages = [...finalArtImagesBase64];
-      updatedImages.splice(index, 1);
-      setFinalArtImagesBase64(updatedImages);
-    };
+    // const removeFinalArtImage = (index) => {
+    //   const updatedImages = [...finalArtImagesBase64];
+    //   updatedImages.splice(index, 1);
+    //   setFinalArtImagesBase64(updatedImages);
+    // };
 
-    const removeCemeteryApprovalImage = (index) => {
-      const updatedImages = [...cemeteryApprovalImagesBase64];
-      updatedImages.splice(index, 1);
-      setCemeteryApprovalImagesBase64(updatedImages);
-    };
+    // const removeCemeteryApprovalImage = (index) => {
+    //   const updatedImages = [...cemeteryApprovalImagesBase64];
+    //   updatedImages.splice(index, 1);
+    //   setCemeteryApprovalImagesBase64(updatedImages);
+    // };
 
     function dataURLtoBlob(dataURL) {
       const parts = dataURL.split(",");
