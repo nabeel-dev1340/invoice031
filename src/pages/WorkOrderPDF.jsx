@@ -1,39 +1,26 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import modelDetails from "../utils/model_details.json"
 import styled from "styled-components";
 
 export default function WorkOrderPDF() {
   const [data, setData] = useState(null);
   const [workOrderData, setWorkOrderData] = useState([]);
 
-  // Fetch data from local storage on component mount
+  // Fetch data from local storage and JSON file on component mount
   useEffect(() => {
     const storedData = localStorage.getItem("invoiceData");
     if (storedData) {
       setData(JSON.parse(storedData));
     }
-    fetchWorkOrderData();
+    loadWorkOrderData();
   }, []);
 
-  const fetchWorkOrderData = async () => {
+  const loadWorkOrderData = () => {
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/workorderpdf`,
-        {
-          method: "GET",
-          headers: {
-            "ngrok-skip-browser-warning": "69420",
-          },
-        }
-      );
-      if (response.status !== 200) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = response.data;
-      setWorkOrderData(data);
-      console.log(data);
+      setWorkOrderData(modelDetails);
+      console.log(modelDetails);
     } catch (error) {
-      console.error(error.message);
+      console.error("Failed to load work order data", error);
     }
   };
 
