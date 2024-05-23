@@ -17,8 +17,14 @@ export default function WorkOrderPDF() {
 
   const fetchWorkOrderData = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/workorderpdf`
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/workorderpdf`,
+        {
+          method: "GET",
+          headers: {
+            "ngrok-skip-browser-warning": "69420",
+          },
+        }
       );
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
